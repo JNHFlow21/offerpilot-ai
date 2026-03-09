@@ -10,11 +10,18 @@ const createJobSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const parsed = createJobSchema.parse(body);
-  const job = await getJobRepository().createJob(parsed);
+  try {
+    const body = await request.json();
+    const parsed = createJobSchema.parse(body);
+    const job = await getJobRepository().createJob(parsed);
 
-  return NextResponse.json({
-    jobId: job.id,
-  });
+    return NextResponse.json({
+      jobId: job.id,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to create job target.";
+
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

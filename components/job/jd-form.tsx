@@ -9,6 +9,18 @@ interface JdFormState {
   jdText: string;
 }
 
+async function readErrorMessage(
+  response: Response,
+  fallbackMessage: string,
+): Promise<string> {
+  try {
+    const data = (await response.json()) as { error?: string };
+    return data.error || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+}
+
 const fieldStyle = {
   width: "100%",
   borderRadius: "18px",
@@ -44,7 +56,9 @@ export function JdForm() {
       });
 
       if (!createResponse.ok) {
-        throw new Error("Failed to create job target.");
+        throw new Error(
+          await readErrorMessage(createResponse, "Failed to create job target."),
+        );
       }
 
       const created = (await createResponse.json()) as { jobId: string };
@@ -54,7 +68,12 @@ export function JdForm() {
       });
 
       if (!analyzeResponse.ok) {
-        throw new Error("Failed to analyze job description.");
+        throw new Error(
+          await readErrorMessage(
+            analyzeResponse,
+            "Failed to analyze job description.",
+          ),
+        );
       }
 
       router.push(`/jobs/${created.jobId}`);
