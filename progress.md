@@ -15,3 +15,4 @@
 - Added `.env.example` and a cloud setup doc for Supabase + Vercel deployment.
 - Re-verified the repo with `pnpm test` and `pnpm build` after the persistence refactor.
 - Switched the default AI provider path to Gemini with OpenAI compatibility fallback.
+- Added a dedicated Supabase `DATABASE_URL` setup tutorial and clarified runtime secret placement.

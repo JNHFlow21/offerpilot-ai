@@ -78,9 +78,14 @@ pnpm db:migrate
 2. 在项目设置里添加环境变量：
    - `DATABASE_URL`
    - `GEMINI_API_KEY`
-   - `GEMINI_MODEL=gemini-3-flash-preview`
+   - `GEMINI_MODEL=gemini-3.1-pro-preview`
 3. 先发 Preview Deployment
 4. 验证 `JD 录入 -> 解析结果页` 走通后，再考虑 Production
+
+补充：
+
+- `Vercel Environment Variables` 才是当前 Web 应用运行时真正读取的位置
+- `GitHub repo secrets` 只在以后你引入 `GitHub Actions` 工作流时才有必要
 
 ## 6. 当前代码状态
 
