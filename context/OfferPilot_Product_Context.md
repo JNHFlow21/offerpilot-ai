@@ -13,11 +13,11 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 
 - 产品名：`OfferPilot`
 - GitHub 仓库：[`JNHFlow21/offerpilot-ai`](https://github.com/JNHFlow21/offerpilot-ai)
-- 产品定位：`面向 AI/产品岗求职者的 AI 面试准备 Copilot`
+- 产品定位：`面向 AI/产品岗求职者的 AI 求职准备 Copilot`
 
 一句话定义：
 
-**帮助用户把 `JD 解析 -> 知识学习 -> 模拟面试 -> 薄弱项追踪` 串成闭环的 AI 求职面试助手。**
+**帮助用户完成 `简历输入 -> JD 解析 -> 简历按 JD 改写 -> 面试辅助` 的 AI 求职准备 Copilot。**
 
 ## 2. 为什么做这个产品
 
@@ -39,18 +39,26 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 ## 4. 核心用户痛点
 
 1. 岗位 JD 看不懂，不知道该准备什么
-2. 面试资料太散，知识点看了不会答
-3. 缺少高质量模拟面试与反馈
-4. 练习记录无法沉淀，薄弱项不清楚
+2. 简历和目标岗位脱节，不知道该怎么改
+3. 面试资料太散，知识点看了不会答
+4. 不知道改完简历后最可能被问什么
 
-## 5. MVP 核心范围
+## 5. 当前 MVP 核心范围
 
-MVP 只做 4 个模块：
+当前 MVP 只做 4 个用户核心能力：
 
-1. `JD 解析`
-2. `知识库问答`
-3. `模拟面试`
-4. `练习记录与薄弱项追踪`
+1. `简历输入与结构化`
+2. `JD 解析`
+3. `简历按 JD 改写`
+4. `面试辅助`
+
+支撑能力：
+
+- `平台预置知识库 / RAG`
+- `用户资料 Memory`
+- `结构化 Workflow`
+- `Prompt 约束输出`
+- `轻 Agent（后续用于多轮模拟）`
 
 明确不做：
 
@@ -60,17 +68,22 @@ MVP 只做 4 个模块：
 - 泛求职平台能力
 - 大而全的通用 Agent
 
+说明：
+
+- 用户不需要自己配置 RAG
+- 面经、常见问题、岗位知识点由平台预置和维护
+- 用户主要只需要提供：`简历 + 目标 JD`
+
 ## 6. 核心闭环
 
 产品主路径：
 
-1. 用户输入目标岗位 JD
-2. 系统拆解考察维度和准备重点
-3. 用户导入简历 / 项目 / 资料
-4. 系统提供个性化知识问答和题库
-5. 用户进行模拟面试
-6. 系统评分、反馈、改写建议
-7. 系统记录薄弱项并推荐下一轮练习
+1. 用户输入简历
+2. 用户输入目标岗位 JD
+3. 系统拆解岗位要求、考察维度和面试重点
+4. 系统结合预置知识库给出简历改写建议
+5. 系统输出高概率问题、追问点和答题辅助
+6. 用户基于修改后的简历继续准备或进入后续模拟
 
 ## 7. AI 方案拆解
 
@@ -80,30 +93,42 @@ MVP 只做 4 个模块：
 
 用于：
 
-- 面经问答
+- 平台预置面经检索
 - JD 解析辅助
-- 知识点解释
-- 项目包装建议
+- 简历改写建议
+- 面试问题与答题辅助
 
 知识源包括：
 
 - 岗位 JD
-- 面经文档
+- 平台维护的面经文档
 - AI 产品知识笔记
-- 用户自己的项目笔记
+- 用户自己的简历 / 项目笔记
 
 ### Workflow
 
 用于：
 
 - JD 拆解
-- 题型归类
-- 回答评分
-- 复盘总结
+- 简历改写
+- 问题生成
+- 答题辅助组织
 
 原因：
 
 - 这些是高频、标准化、可控的任务
+
+### Prompt
+
+用于：
+
+- 限制简历改写风格和信息边界
+- 约束输出结构，避免大段泛泛润色
+- 让面试辅助内容贴合 `JD + 简历 + 知识库`
+
+原因：
+
+- 这是你面试里必须能讲清楚的一层，不是可有可无的胶水
 
 ### Memory / 状态
 
@@ -115,13 +140,13 @@ MVP 只做 4 个模块：
 - 目标城市
 - 简历版本
 - 项目列表
-- 偏弱题型
+- 已完成的岗位改写记录
 
 #### 当前任务状态
 
-- 正在练哪一题
-- 历次评分
-- 高频错误
+- 当前正在准备哪个岗位
+- 当前正在改哪份简历
+- 最近一次改写结果
 - 推荐下一步动作
 
 ### 轻 Agent
@@ -138,19 +163,19 @@ MVP 只做 4 个模块：
 
 ### 北极星指标
 
-**每周完成有效面试训练任务的用户数**
+**每周完成有效岗位准备任务的用户数**
 
 ### 过程指标
 
 - 岗位解析完成率
-- 知识问答使用率
-- 模拟面试提交率
-- 完整训练闭环完成率
-- 次日 / 7 日复练率
+- 简历改写完成率
+- 面试辅助使用率
+- 完整准备闭环完成率
+- 次日 / 7 日复用率
 
 ### 护栏指标
 
-- 明显错误回答率
+- 明显错误建议率
 - 幻觉率
 - 用户中途放弃率
 - 平均响应时长
@@ -195,6 +220,7 @@ MVP 只做 4 个模块：
 - 设计稿：[2026-03-09-ai-job-interview-assistant-design.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-ai-job-interview-assistant-design.md)
 - PRD：[2026-03-09-ai-job-interview-assistant-prd.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-ai-job-interview-assistant-prd.md)
 - 落地规格：[2026-03-09-offerpilot-mvp-pages-data-stack.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-offerpilot-mvp-pages-data-stack.md)
+- 新阶段计划：[2026-03-09-phase-3-resume-rewrite-interview-assist-implementation.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-phase-3-resume-rewrite-interview-assist-implementation.md)
 - 云端配置：[2026-03-09-offerpilot-cloud-setup.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-offerpilot-cloud-setup.md)
 - Supabase 教程：[2026-03-09-supabase-database-url-setup.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-supabase-database-url-setup.md)
 - 行程文档：[OfferPilot_Project_Journey.md](/Users/fujunhao/Desktop/OfferPilot/context/OfferPilot_Project_Journey.md)
@@ -211,10 +237,10 @@ MVP 只做 4 个模块：
 2. 定义数据结构和状态结构
 3. 选技术栈
 4. 先实现 MVP 的主路径：
+   - 简历输入
    - JD 解析
-   - 知识库问答
-   - 模拟面试
-   - 练习记录
+   - 简历按 JD 改写
+   - 面试辅助
 
 ## 13. 可直接贴给新会话的启动上下文
 
@@ -223,21 +249,22 @@ MVP 只做 4 个模块：
 ```text
 我们正在做一个名为 OfferPilot 的产品，仓库是 https://github.com/JNHFlow21/offerpilot-ai 。
 
-产品定位：面向 AI/产品岗求职者的 AI 面试准备 Copilot。
+产品定位：面向 AI/产品岗求职者的 AI 求职准备 Copilot。
 
-一句话定义：帮助用户把 JD 解析 -> 知识学习 -> 模拟面试 -> 薄弱项追踪 串成闭环的 AI 求职面试助手。
+一句话定义：帮助用户完成 简历输入 -> JD 解析 -> 简历按 JD 改写 -> 面试辅助 的 AI 求职准备工具。
 
-MVP 只做四个模块：
-1. JD 解析
-2. 知识库问答
-3. 模拟面试
-4. 练习记录与薄弱项追踪
+当前 MVP 只做四个用户核心能力：
+1. 简历输入与结构化
+2. JD 解析
+3. 简历按 JD 改写
+4. 面试辅助
 
 AI 方案：
-- RAG：面经、JD、知识库问答
-- Workflow：JD 拆解、评分、复盘
-- Memory：用户长期信息和任务状态
-- 轻 Agent：多轮模拟和动态追问
+- RAG：预置面经、JD、简历/项目资料检索
+- Workflow：JD 拆解、简历改写、问题生成
+- Memory：用户长期信息和简历/JD 任务状态
+- Prompt：结构化改写和答题辅助约束
+- 轻 Agent：后续用于多轮模拟和动态追问
 
 请基于这个方向，继续从页面级功能清单、数据结构和 MVP 实现开始推进。
 ```

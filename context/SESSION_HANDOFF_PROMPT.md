@@ -11,7 +11,7 @@ GitHub 仓库：
 https://github.com/JNHFlow21/offerpilot-ai
 
 产品定位：
-一个面向 AI/产品岗求职者的 AI 面试准备 Copilot，帮助用户把 JD 解析 -> 知识学习 -> 模拟面试 -> 薄弱项追踪 串成闭环。
+一个面向 AI/产品岗求职者的 AI 求职准备 Copilot，帮助用户完成 简历输入 -> JD 解析 -> 简历按 JD 改写 -> 面试辅助。
 
 你先读取并理解这些已有文档，再继续往下推进，不要重复做前面的分析：
 
@@ -20,16 +20,17 @@ https://github.com/JNHFlow21/offerpilot-ai
 3. /Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-ai-job-interview-assistant-prd.md
 
 当前共识：
-- MVP 只做 4 个模块：JD 解析、知识库问答、模拟面试、练习记录与薄弱项追踪
-- AI 方案拆分：
-  - RAG：面经、JD、知识库问答
-  - Workflow：JD 拆解、评分、复盘
-  - Memory：用户长期信息和任务状态
-  - 轻 Agent：多轮模拟和动态追问
+- 当前 MVP 只做 4 个用户核心能力：简历输入与结构化、JD 解析、简历按 JD 改写、面试辅助
+- 支撑能力：
+  - RAG：预置面经、JD、简历/项目资料检索
+  - Workflow：JD 拆解、简历改写、问题生成
+  - Memory：用户长期信息和简历/JD 任务状态
+  - Prompt：结构化改写和答题辅助约束
+  - 轻 Agent：后续用于多轮模拟和动态追问
 - 当前目标不是继续写概念文档，而是直接进入产品落地
 
 你接下来请直接做这件事：
-基于现有 PRD，继续输出“页面级功能清单 + 数据结构设计 + MVP 技术栈建议”，并尽量写成可以直接开始实现的形式。
+基于现有 PRD，继续推进最核心 MVP：简历输入、JD 解析、简历按 JD 改写、面试辅助，并尽量写成可以直接开始实现的形式。
 
 要求：
 - 不要重复泛泛总结项目背景
