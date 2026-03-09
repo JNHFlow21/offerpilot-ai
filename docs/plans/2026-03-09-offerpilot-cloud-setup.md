@@ -86,6 +86,7 @@ pnpm db:migrate
 
 - `Vercel Environment Variables` 才是当前 Web 应用运行时真正读取的位置
 - `GitHub repo secrets` 只在以后你引入 `GitHub Actions` 工作流时才有必要
+- 你现在提供的是 `Direct Connection String`，本地开发可先直接使用；部署到 Vercel 时，建议改成 `Transaction pooler` 连接串
 
 ## 6. 当前代码状态
 
@@ -95,6 +96,11 @@ pnpm db:migrate
 - 生产环境或 Vercel 环境下，如果没有 `DATABASE_URL`，会直接报错，避免“假上线”
 - 一旦补上 `DATABASE_URL`，`/api/jobs` 和 `/api/jobs/[jobId]/analyze` 就会切到真实数据库持久化路径
 - AI provider 默认优先选 `Gemini`；如果配置了 `GEMINI_API_KEY`，不会依赖 OpenAI
+
+当前需要特别注意：
+
+- 你在 Supabase Overview 里复制到的 `Direct Connection String` 不等于当前推荐的 `DATABASE_URL`
+- 对 OfferPilot 当前本地/Vercel 路径，应改用 `Transaction pooler` 那条 `6543` 连接串
 
 ## 7. 官方文档参考
 

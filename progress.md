@@ -16,3 +16,5 @@
 - Re-verified the repo with `pnpm test` and `pnpm build` after the persistence refactor.
 - Switched the default AI provider path to Gemini with OpenAI compatibility fallback.
 - Added a dedicated Supabase `DATABASE_URL` setup tutorial and clarified runtime secret placement.
+- Set the default Gemini model to `gemini-3.1-pro-preview` and created a local `.env.local` for the current machine.
+- Verified the provided Supabase direct connection string is not the right `DATABASE_URL` for the current path, and updated local config/docs to require the transaction pooler string instead.

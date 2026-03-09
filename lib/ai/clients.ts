@@ -22,7 +22,7 @@ export class GeminiJdAnalysisClient implements JdAnalysisClient {
 
   constructor(
     apiKey = process.env.GEMINI_API_KEY,
-    model = process.env.GEMINI_MODEL ?? "gemini-3-flash-preview",
+    model = process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
   ) {
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set.");

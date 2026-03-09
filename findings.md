@@ -16,4 +16,5 @@
 - There is no Supabase MCP or authenticated Supabase control plane access in this environment, so Supabase project creation still requires one manual user step.
 - The AI layer now defaults to Gemini when `GEMINI_API_KEY` is present and only falls back to OpenAI if Gemini is absent.
 - Runtime secrets for this app should live in `Vercel Environment Variables`, not GitHub repository secrets, unless GitHub Actions is later introduced.
-- Google official docs did not surface a confirmed public `gemini-3.1-pro-preview` model entry in the pages I checked, so that model name should be treated as a candidate to verify at runtime.
+- Google official Gemini 3 documentation explicitly lists `gemini-3.1-pro-preview` as a valid model and migration target from deprecated `gemini-3-pro-preview`.
+- The Supabase direct connection string supplied from Project Overview failed to resolve in this environment, which matches Supabase docs that direct connections are IPv6-oriented and not the right default for serverless/transient runtimes.
