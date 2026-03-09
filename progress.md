@@ -21,3 +21,4 @@
 - Connected to Supabase using the transaction pooler string and applied phase 1 SQL migrations.
 - Reproduced a real Gemini output/schema mismatch, added a failing test, and fixed it by normalizing question type labels before schema parse.
 - Verified a live Gemini JD analysis call now succeeds with the production model path.
+- Attempted to continue with Vercel deployment, but the current machine needs Vercel auth repaired before preview deploy can proceed.

@@ -21,3 +21,4 @@
 - The Supabase transaction pooler connection string successfully connected from this environment.
 - Both SQL migrations applied successfully to Supabase, and `job_targets.user_id` is now nullable in the live database.
 - A real Gemini `gemini-3.1-pro-preview` JD analysis call succeeded after normalizing human-readable `questionTypeWeights` labels.
+- Vercel deployment is currently blocked by authentication on this machine: the MCP requires auth, the installed CLI token is invalid, and `vercel login` failed before browser handoff because the OIDC fetch could not complete.
