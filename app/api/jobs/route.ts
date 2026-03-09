@@ -9,6 +9,34 @@ const createJobSchema = z.object({
   jdText: z.string().min(20),
 });
 
+function formatRouteError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return "Failed to create job target.";
+  }
+
+  const details = error as Error & {
+    code?: string;
+    detail?: string;
+    hint?: string;
+  };
+
+  const parts = [error.message];
+
+  if (details.code) {
+    parts[0] = `${parts[0]} (code: ${details.code})`;
+  }
+
+  if (details.detail) {
+    parts.push(`Detail: ${details.detail}`);
+  }
+
+  if (details.hint) {
+    parts.push(`Hint: ${details.hint}`);
+  }
+
+  return parts.join(" ");
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -19,8 +47,7 @@ export async function POST(request: Request) {
       jobId: job.id,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to create job target.";
+    const message = formatRouteError(error);
 
     return NextResponse.json({ error: message }, { status: 500 });
   }
