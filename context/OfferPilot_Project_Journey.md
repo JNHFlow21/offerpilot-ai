@@ -164,40 +164,41 @@ OfferPilot 的推荐开发顺序：
 
 ### 进行中
 
-- [ ] `能力三：简历输入与结构化`
-- [ ] `能力四：简历按 JD 改写`
-- [ ] `能力五：面试辅助`
+- [x] `能力三：简历输入与结构化`
+- [x] `能力四：简历按 JD 改写`
+- [x] `能力五：面试辅助`
 - [ ] `后续能力：模拟面试`
 - [ ] `后续能力：记录与薄弱项追踪`
 
 ### 当前未做完的关键基础设施
 
 - [x] `knowledge_sources` / `knowledge_chunks` 表与第一版检索链路
-- [ ] `resume_workspaces` / `resume_rewrites` 表与改写 workflow
+- [x] `resume_workspaces` / `resume_rewrites` 表与改写 workflow
 - [ ] `interview_sessions` / `interview_turns` 表与评分 workflow
 - [ ] `records` 聚合页和薄弱项规则计算
 - [ ] Supabase 项目 link 本地目录稳定化
 
 ## 7. 当前下一步
 
-下一阶段不再扩散，直接进入 **MVP Phase 3：简历按 JD 改写 + 面试辅助**。
+Phase 3 已完成。下一阶段进入 **MVP Phase 4：模拟面试 + 记录与薄弱项追踪**。
 
 执行顺序固定为：
 
-1. 补 `resume_workspaces`、`resume_rewrites` schema / migration
-2. 建简历工作区：
-   - 输入原始简历
-   - 关联目标岗位
-   - 保存当前准备上下文
-3. 接 `简历按 JD 改写` workflow：
+1. 补 `interview_sessions`、`interview_turns` schema / migration
+2. 建 `模拟面试` 工作流：
    - 结合 JD 解析
+   - 结合当前简历改写结果
    - 结合预置知识库
-   - 输出修改理由和岗位匹配点
-4. 接 `面试辅助` 输出：
-   - 高概率问题
+3. 接多轮追问和结构化评分：
+   - 当前问题
+   - 用户回答
    - 追问点
-   - 答题思路
-5. 再进入更完整的 `模拟面试` 和 `records`
+   - 评分与复盘
+4. 建 `records` 聚合页：
+   - 历史练习记录
+   - 能力维度分布
+   - 薄弱项趋势
+5. 再进入更完整的会员、面经回流和数据飞轮
 
 对应实现计划：
 
@@ -225,6 +226,8 @@ OfferPilot 的推荐开发顺序：
 - 已完成 Phase 2 第二条切片：`knowledge_sources + knowledge_chunks + /api/knowledge/* + /knowledge`
 - 已把 `0004_add_knowledge_tables.sql` 执行到 Supabase，并完成第一版 source-bounded retrieval + citations
 - 已完成文档对齐：当前 MVP 主路径调整为 `简历输入 -> JD 解析 -> 简历按 JD 改写 -> 面试辅助`
+- 已完成 Phase 3：`resume_workspaces + resume_rewrites + /api/resume + /api/resume/rewrite + /api/interview/assist + /prepare`
+- 已把 `0005_add_resume_rewrite_tables.sql` 执行到 Supabase，并通过 `pnpm test` / `pnpm build`
 
 ## 9. 更新规则
 
