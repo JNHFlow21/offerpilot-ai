@@ -164,7 +164,7 @@ OfferPilot 的推荐开发顺序：
 
 ### 当前未做完的关键基础设施
 
-- [ ] `profile` 页面和用户背景持久化
+- [x] `profile` 页面和用户背景持久化
 - [ ] `knowledge_sources` / `knowledge_chunks` 表与 RAG 检索链路
 - [ ] `interview_sessions` / `interview_turns` 表与评分 workflow
 - [ ] `records` 聚合页和薄弱项规则计算
@@ -212,6 +212,7 @@ OfferPilot 的推荐开发顺序：
 - 已完成 Vercel / Supabase CLI 授权，可直接查看生产部署与项目状态
 - 已定位并修复生产环境 `DATABASE_URL` 密码错误，`/api/jobs` 与 `/api/jobs/[jobId]/analyze` 已返回 `200`
 - 已确认 MVP 第一个功能 `JD 解析` 正式完成
+- 已完成 Phase 2 第一条切片：`/profile + /api/profile + user_profiles` 真实持久化
 
 ## 9. 更新规则
 

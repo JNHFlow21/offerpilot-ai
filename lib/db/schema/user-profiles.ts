@@ -7,9 +7,7 @@ export const authUsers = authSchema.table("users", {
 });
 
 export const userProfiles = pgTable("user_profiles", {
-  id: uuid("id")
-    .primaryKey()
-    .references(() => authUsers.id, { onDelete: "cascade" }),
+  id: uuid("id").primaryKey().defaultRandom(),
   displayName: text("display_name"),
   targetRoles: text("target_roles").array().notNull().default([]),
   targetCity: text("target_city"),
