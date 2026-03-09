@@ -19,6 +19,7 @@ export interface JobRecord extends JobRecordInput {
 
 export interface JobRepository {
   createJob(input: JobRecordInput): Promise<JobRecord>;
+  listJobs(): Promise<JobRecord[]>;
   getJobById(jobId: string): Promise<JobRecord | null>;
   saveAnalysis(jobId: string, analysis: JdAnalysisResult): Promise<JobRecord | null>;
 }
@@ -36,6 +37,12 @@ class MemoryJobRepository implements JobRepository {
     memoryJobs.set(record.id, record);
 
     return record;
+  }
+
+  async listJobs() {
+    return [...memoryJobs.values()].sort((left, right) =>
+      right.createdAt.localeCompare(left.createdAt),
+    );
   }
 
   async getJobById(jobId: string) {
@@ -79,6 +86,23 @@ class PostgresJobRepository implements JobRepository {
       jdText: created.jdText,
       createdAt: created.createdAt.toISOString(),
     };
+  }
+
+  async listJobs() {
+    const db = getDb();
+    const jobs = await db
+      .select()
+      .from(jobTargets)
+      .orderBy(desc(jobTargets.updatedAt), desc(jobTargets.createdAt))
+      .limit(12);
+
+    return jobs.map((job) => ({
+      id: job.id,
+      companyName: job.companyName ?? undefined,
+      roleName: job.roleName,
+      jdText: job.jdText,
+      createdAt: job.createdAt.toISOString(),
+    }));
   }
 
   async getJobById(jobId: string) {
