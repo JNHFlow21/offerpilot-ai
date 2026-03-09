@@ -3,7 +3,15 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 
 import { getDefaultAiProvider } from "@/lib/ai/clients";
+import { buildInterviewAssistPrompt } from "@/lib/ai/prompts/interview-assist";
 import { buildResumeRewritePrompt } from "@/lib/ai/prompts/resume-rewrite";
+import {
+  interviewAssistJsonSchema,
+  interviewAssistRequestSchema,
+  interviewAssistSchema,
+  type InterviewAssistRequest,
+  type InterviewAssistResult,
+} from "@/lib/ai/schemas/interview-assist";
 import type {
   KnowledgeChunkContext,
   KnowledgeScope,
@@ -28,6 +36,10 @@ import { getResumeWorkspaceStore } from "@/lib/services/resume-workspace-service
 
 export interface ResumeRewriteClient {
   rewrite(input: { prompt: string }): Promise<ResumeRewriteResult | unknown>;
+}
+
+export interface InterviewAssistClient {
+  generate(input: { prompt: string }): Promise<InterviewAssistResult | unknown>;
 }
 
 export interface ResumeRewriteStore {
@@ -261,6 +273,80 @@ class OpenAiResumeRewriteClient implements ResumeRewriteClient {
   }
 }
 
+class GeminiInterviewAssistClient implements InterviewAssistClient {
+  private readonly client: OpenAI;
+  private readonly model: string;
+
+  constructor(
+    apiKey = process.env.GEMINI_API_KEY,
+    model = process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
+  ) {
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not set.");
+    }
+
+    this.client = new OpenAI({
+      apiKey,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    });
+    this.model = model;
+  }
+
+  async generate(input: { prompt: string }) {
+    const response = await this.client.beta.chat.completions.parse({
+      model: this.model,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an interview-prep copilot. Generate realistic questions, follow-ups, and answer framing grounded in supplied evidence.",
+        },
+        {
+          role: "user",
+          content: input.prompt,
+        },
+      ],
+      response_format: zodResponseFormat(interviewAssistSchema, "interview_assist"),
+    });
+
+    return response.choices[0]?.message.parsed ?? null;
+  }
+}
+
+class OpenAiInterviewAssistClient implements InterviewAssistClient {
+  private readonly client: OpenAI;
+  private readonly model: string;
+
+  constructor(
+    apiKey = process.env.OPENAI_API_KEY,
+    model = process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+  ) {
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not set.");
+    }
+
+    this.client = new OpenAI({ apiKey });
+    this.model = model;
+  }
+
+  async generate(input: { prompt: string }) {
+    const response = await this.client.responses.create({
+      model: this.model,
+      input: input.prompt,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "interview_assist",
+          strict: true,
+          schema: interviewAssistJsonSchema,
+        },
+      },
+    });
+
+    return JSON.parse(response.output_text);
+  }
+}
+
 const memoryRewriteStore = new MemoryResumeRewriteStore();
 
 export function getResumeRewriteStore(): ResumeRewriteStore {
@@ -284,6 +370,20 @@ export function createDefaultResumeRewriteClient(): ResumeRewriteClient {
 
   if (provider === "openai") {
     return new OpenAiResumeRewriteClient();
+  }
+
+  throw new Error("No AI provider key found. Set GEMINI_API_KEY or OPENAI_API_KEY.");
+}
+
+export function createDefaultInterviewAssistClient(): InterviewAssistClient {
+  const provider = getDefaultAiProvider();
+
+  if (provider === "gemini") {
+    return new GeminiInterviewAssistClient();
+  }
+
+  if (provider === "openai") {
+    return new OpenAiInterviewAssistClient();
   }
 
   throw new Error("No AI provider key found. Set GEMINI_API_KEY or OPENAI_API_KEY.");
@@ -325,6 +425,50 @@ export async function rewriteResumeForJob(
   const rewrite = resumeRewriteSchema.parse(rawRewrite);
 
   return dependencies.rewriteStore.saveRewrite(workspace.id, parsed.jobId, rewrite);
+}
+
+export async function generateInterviewAssistForJob(
+  input: InterviewAssistRequest,
+  dependencies: ResumeRewriteDependencies = {
+    workspaceStore: getResumeWorkspaceStore(),
+    jobRepository: getJobRepository(),
+    knowledgeStore: getKnowledgeStore(),
+    rewriteStore: getResumeRewriteStore(),
+  },
+  client: InterviewAssistClient = createDefaultInterviewAssistClient(),
+) {
+  const parsed = interviewAssistRequestSchema.parse(input);
+  const workspace = await dependencies.workspaceStore.getCurrentWorkspace();
+
+  if (!workspace) {
+    throw new Error("Resume workspace not found.");
+  }
+
+  const job = await dependencies.jobRepository.getJobById(parsed.jobId);
+
+  if (!job) {
+    throw new Error("Job target not found.");
+  }
+
+  const rewrite = await dependencies.rewriteStore.getLatestRewrite(workspace.id, parsed.jobId);
+
+  if (!rewrite) {
+    throw new Error("Resume rewrite not found.");
+  }
+
+  const chunks = await dependencies.knowledgeStore.listChunkContexts(
+    parsed.knowledgeScope as KnowledgeScope,
+  );
+  const selectedChunks = selectTopRewriteChunks(job, chunks);
+  const prompt = buildInterviewAssistPrompt({
+    workspace,
+    job,
+    rewrite,
+    knowledgeChunks: selectedChunks,
+  });
+  const rawAssist = await client.generate({ prompt });
+
+  return interviewAssistSchema.parse(rawAssist);
 }
 
 export function resetMemoryResumeRewriteStore() {
