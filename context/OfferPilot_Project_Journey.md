@@ -144,24 +144,57 @@ OfferPilot 的推荐开发顺序：
 - 已完成 MVP 页面级功能清单、数据结构设计、技术栈建议
 - 已初始化 OfferPilot 独立 Git 仓库
 - 已绑定 GitHub 远端仓库
-- 下一步进入工程实现阶段
+- 已完成第一条 MVP 业务闭环并上线生产环境
 
-## 6. 当前下一步
+## 6. MVP 模块状态
 
-下一阶段建议按下面顺序执行：
+### 已完成
 
-1. 搭建 `Next.js + Supabase + Drizzle` 工程基础
-2. 先完成第一批底层实现：
-   - `database migrations`
-   - `zod schemas`
-   - `JD 解析 workflow`
-3. 再把这批底层能力接到第一条页面闭环：
-   - `JD 录入 -> JD 解析 -> 岗位详情`
-4. 然后实现知识入库与问答
-5. 再实现模拟面试和评分
-6. 最后实现记录页和弱项推荐
+- [x] `模块一：JD 解析`
+- [x] `/jobs/new -> /api/jobs -> /api/jobs/[jobId]/analyze -> /jobs/[jobId]`
+- [x] `job_targets` / `jd_analyses` 真实落库到 Supabase
+- [x] `gemini-3.1-pro-preview` 真实解析 JD 并返回结构化结果
+- [x] Vercel 生产环境部署完成并验证 JD 解析链路可用
 
-## 7. 进展记录
+### 进行中
+
+- [ ] `模块二：知识库问答`
+- [ ] `模块三：模拟面试`
+- [ ] `模块四：练习记录与薄弱项追踪`
+
+### 当前未做完的关键基础设施
+
+- [ ] `profile` 页面和用户背景持久化
+- [ ] `knowledge_sources` / `knowledge_chunks` 表与 RAG 检索链路
+- [ ] `interview_sessions` / `interview_turns` 表与评分 workflow
+- [ ] `records` 聚合页和薄弱项规则计算
+- [ ] Supabase 项目 link 本地目录稳定化
+
+## 7. 当前下一步
+
+下一阶段不再扩散，直接进入 **MVP Phase 2：个人背景 + 知识库问答**。
+
+执行顺序固定为：
+
+1. 完成 `profile` 页面与 `user_profiles` 真实读写
+2. 补 `knowledge_sources`、`knowledge_chunks` schema / migration
+3. 建知识入库流程：
+   - JD
+   - 简历文本
+   - 项目经历
+   - 手动粘贴的面经/知识笔记
+4. 接第一版检索问答：
+   - `POST /api/knowledge/ask`
+   - 带来源引用
+   - 只回答绑定知识范围内的问题
+5. 做 `/knowledge` 页面闭环
+6. 再进入 `interview` 和 `records`
+
+对应实现计划：
+
+- [2026-03-09-phase-2-profile-knowledge-implementation.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-phase-2-profile-knowledge-implementation.md)
+
+## 8. 进展记录
 
 ### 2026-03-09
 
@@ -176,7 +209,11 @@ OfferPilot 的推荐开发顺序：
 - 补充云端配置模板与部署说明，当前只差真实 Supabase / OpenAI 环境变量即可接云端
 - 已切换到 Gemini 作为默认模型，并确认 `gemini-3.1-pro-preview` 可实际完成 JD 解析
 - 已连接 Supabase Transaction Pooler，并把 phase 1 migration 真正执行到云端数据库
-## 8. 更新规则
+- 已完成 Vercel / Supabase CLI 授权，可直接查看生产部署与项目状态
+- 已定位并修复生产环境 `DATABASE_URL` 密码错误，`/api/jobs` 与 `/api/jobs/[jobId]/analyze` 已返回 `200`
+- 已确认 MVP 第一个功能 `JD 解析` 正式完成
+
+## 9. 更新规则
 
 后续每次有重要进展，都在这份文档补一条：
 
