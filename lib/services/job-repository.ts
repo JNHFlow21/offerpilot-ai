@@ -9,6 +9,7 @@ export interface JobRecordInput {
   companyName?: string;
   roleName: string;
   jdText: string;
+  sourceUrl?: string;
 }
 
 export interface JobRecord extends JobRecordInput {
@@ -75,6 +76,7 @@ class PostgresJobRepository implements JobRepository {
         companyName: input.companyName ?? null,
         roleName: input.roleName,
         jdText: input.jdText,
+        jobSourceUrl: input.sourceUrl ?? null,
         userId: null,
       })
       .returning();
@@ -84,6 +86,7 @@ class PostgresJobRepository implements JobRepository {
       companyName: created.companyName ?? undefined,
       roleName: created.roleName,
       jdText: created.jdText,
+      sourceUrl: created.jobSourceUrl ?? undefined,
       createdAt: created.createdAt.toISOString(),
     };
   }
@@ -101,6 +104,7 @@ class PostgresJobRepository implements JobRepository {
       companyName: job.companyName ?? undefined,
       roleName: job.roleName,
       jdText: job.jdText,
+      sourceUrl: job.jobSourceUrl ?? undefined,
       createdAt: job.createdAt.toISOString(),
     }));
   }
@@ -129,6 +133,7 @@ class PostgresJobRepository implements JobRepository {
       companyName: job.companyName ?? undefined,
       roleName: job.roleName,
       jdText: job.jdText,
+      sourceUrl: job.jobSourceUrl ?? undefined,
       createdAt: job.createdAt.toISOString(),
       analysis: analysisRow
         ? jdAnalysisSchema.parse({

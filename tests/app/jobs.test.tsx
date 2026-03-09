@@ -5,15 +5,15 @@ import JobDetailPage from "@/app/jobs/[jobId]/page";
 import NewJobPage from "@/app/jobs/new/page";
 
 describe("job pages", () => {
-  it("renders the new job form fields", async () => {
+  it("renders the Chinese new job form fields", async () => {
     const Page = await NewJobPage();
     render(Page);
 
-    expect(screen.getByLabelText(/company name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/role name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/job description/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/公司名称/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/岗位名称/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/岗位 jd/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /analyze jd/i }),
+      screen.getByRole("button", { name: /保存并解析 jd/i }),
     ).toBeInTheDocument();
   });
 
@@ -23,6 +23,6 @@ describe("job pages", () => {
     });
     render(Page);
 
-    expect(screen.getByText(/job target not found/i)).toBeInTheDocument();
+    expect(screen.getByText(/未找到该岗位 jd/i)).toBeInTheDocument();
   });
 });

@@ -38,35 +38,35 @@ describe("ProfileForm", () => {
 
     render(<ProfileForm />);
 
-    fireEvent.change(screen.getByLabelText(/name/i), {
+    fireEvent.change(screen.getByLabelText(/姓名/i), {
       target: { value: "Fujun" },
     });
-    fireEvent.change(screen.getByLabelText(/target roles/i), {
+    fireEvent.change(screen.getByLabelText(/目标岗位方向/i), {
       target: { value: "AI Product Intern, PM Intern" },
     });
-    fireEvent.change(screen.getByLabelText(/target city/i), {
+    fireEvent.change(screen.getByLabelText(/目标城市/i), {
       target: { value: "Shanghai" },
     });
-    fireEvent.change(screen.getByLabelText(/resume text/i), {
+    fireEvent.change(screen.getByLabelText(/简历全文/i), {
       target: {
         value: "Built AI workflow products and interview prep systems.",
       },
     });
-    fireEvent.change(screen.getByLabelText(/resume summary/i), {
+    fireEvent.change(screen.getByLabelText(/简历摘要/i), {
       target: {
         value: "Product-minded builder with applied AI experience.",
       },
     });
-    fireEvent.change(screen.getByLabelText(/self intro draft/i), {
+    fireEvent.change(screen.getByLabelText(/自我介绍草稿/i), {
       target: {
         value: "I connect user needs, product logic, and AI execution.",
       },
     });
 
-    fireEvent.submit(screen.getByRole("button", { name: /save profile/i }));
+    fireEvent.submit(screen.getByRole("button", { name: /保存个人资料/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/profile saved/i)).toBeInTheDocument();
+      expect(screen.getByText(/个人资料已保存/i)).toBeInTheDocument();
     });
   });
 });

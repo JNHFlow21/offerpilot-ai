@@ -21,19 +21,19 @@ const fieldStyle = {
 
 const sourceTypeOptions: Array<{ value: SourceType; label: string }> = [
   { value: "jd", label: "JD" },
-  { value: "resume", label: "Resume" },
-  { value: "project", label: "Project" },
-  { value: "interview_note", label: "Interview Note" },
-  { value: "knowledge_note", label: "Knowledge Note" },
+  { value: "resume", label: "简历" },
+  { value: "project", label: "项目经历" },
+  { value: "interview_note", label: "面经笔记" },
+  { value: "knowledge_note", label: "知识笔记" },
 ];
 
 const scopeOptions: Array<{ value: KnowledgeScope; label: string }> = [
-  { value: "all", label: "All saved sources" },
-  { value: "jd", label: "JD only" },
-  { value: "resume", label: "Resume only" },
-  { value: "project", label: "Project only" },
-  { value: "interview_note", label: "Interview note only" },
-  { value: "knowledge_note", label: "Knowledge note only" },
+  { value: "all", label: "全部资料源" },
+  { value: "jd", label: "仅 JD" },
+  { value: "resume", label: "仅简历" },
+  { value: "project", label: "仅项目经历" },
+  { value: "interview_note", label: "仅面经笔记" },
+  { value: "knowledge_note", label: "仅知识笔记" },
 ];
 
 interface SourceFormState {
@@ -92,7 +92,7 @@ export function KnowledgeWorkspace({
 
         if (!response.ok) {
           throw new Error(
-            await readErrorMessage(response, "Failed to load knowledge sources."),
+            await readErrorMessage(response, "加载资料源失败。"),
           );
         }
 
@@ -108,7 +108,7 @@ export function KnowledgeWorkspace({
           setSourceError(
             error instanceof Error
               ? error.message
-              : "Failed to load knowledge sources.",
+              : "加载资料源失败。",
           );
         }
       } finally {
@@ -152,7 +152,7 @@ export function KnowledgeWorkspace({
 
       if (!response.ok) {
         throw new Error(
-          await readErrorMessage(response, "Failed to save knowledge source."),
+          await readErrorMessage(response, "保存资料源失败。"),
         );
       }
 
@@ -167,12 +167,12 @@ export function KnowledgeWorkspace({
         title: "",
         contentText: "",
       });
-      setSourceSavedMessage(`Source saved with ${data.chunkCount} chunk(s).`);
+      setSourceSavedMessage(`资料源已保存，已切成 ${data.chunkCount} 个片段。`);
     } catch (error) {
       setSourceError(
         error instanceof Error
           ? error.message
-          : "Failed to save knowledge source.",
+          : "保存资料源失败。",
       );
     } finally {
       setIsSavingSource(false);
@@ -198,7 +198,7 @@ export function KnowledgeWorkspace({
 
       if (!response.ok) {
         throw new Error(
-          await readErrorMessage(response, "Failed to ask knowledge."),
+          await readErrorMessage(response, "提问失败。"),
         );
       }
 
@@ -206,7 +206,7 @@ export function KnowledgeWorkspace({
       setAnswer(data.answer);
     } catch (error) {
       setQuestionError(
-        error instanceof Error ? error.message : "Failed to ask knowledge.",
+        error instanceof Error ? error.message : "提问失败。",
       );
     } finally {
       setIsAsking(false);
@@ -243,7 +243,7 @@ export function KnowledgeWorkspace({
               fontSize: "12px",
             }}
           >
-            Source Boundary
+            资料边界
           </p>
           <h2
             style={{
@@ -253,17 +253,16 @@ export function KnowledgeWorkspace({
               letterSpacing: "-0.04em",
             }}
           >
-            Save exactly what can be cited.
+            只保存你愿意被引用的资料。
           </h2>
           <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.7 }}>
-            Each saved source becomes visible prep context. Keep it specific,
-            labeled, and close to how you would actually revise it.
+            每一条资料都会成为后续回答与建议的可引用上下文。内容要具体、带标签，并尽量贴近真实面试准备场景。
           </p>
         </div>
 
         <form onSubmit={handleSourceSubmit} style={{ display: "grid", gap: "14px" }}>
           <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-            Source Type
+            资料类型
             <select
               value={sourceForm.sourceType}
               onChange={(event) =>
@@ -280,26 +279,26 @@ export function KnowledgeWorkspace({
           </label>
 
           <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-            Title
+            标题
             <input
-              aria-label="Knowledge Source Title"
+              aria-label="资料标题"
               value={sourceForm.title}
               onChange={(event) => updateSourceForm("title", event.target.value)}
-              placeholder="e.g. ByteDance TRAE JD"
+              placeholder="例如：字节跳动 TRAE 岗位 JD"
               style={fieldStyle}
             />
           </label>
 
           <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-            Source Content
+            资料内容
             <textarea
-              aria-label="Knowledge Source Content"
+              aria-label="资料内容"
               rows={8}
               value={sourceForm.contentText}
               onChange={(event) =>
                 updateSourceForm("contentText", event.target.value)
               }
-              placeholder="Paste JD, project notes, interview notes, or a focused knowledge memo."
+              placeholder="粘贴 JD、项目笔记、面经笔记，或一段需要后续被引用的知识内容。"
               style={{ ...fieldStyle, resize: "vertical" }}
             />
           </label>
@@ -331,7 +330,7 @@ export function KnowledgeWorkspace({
               opacity: isSavingSource ? 0.72 : 1,
             }}
           >
-            {isSavingSource ? "Saving Source..." : "Save Source"}
+            {isSavingSource ? "保存中..." : "保存资料源"}
           </button>
         </form>
 
@@ -343,14 +342,14 @@ export function KnowledgeWorkspace({
             borderTop: "1px solid rgba(88, 66, 36, 0.12)",
           }}
         >
-          <h3 style={{ margin: 0, fontSize: "16px" }}>Saved Sources</h3>
+          <h3 style={{ margin: 0, fontSize: "16px" }}>已保存资料源</h3>
           {isLoadingSources ? (
-            <p style={{ margin: 0, color: "#6f5d48" }}>Loading sources...</p>
+            <p style={{ margin: 0, color: "#6f5d48" }}>加载中...</p>
           ) : null}
 
           {!isLoadingSources && sources.length === 0 ? (
             <p style={{ margin: 0, color: "#6f5d48", lineHeight: 1.6 }}>
-              No saved sources yet. Add the first bounded input on the left.
+              还没有资料源。先在左侧保存第一条可引用资料。
             </p>
           ) : null}
 
@@ -428,7 +427,7 @@ export function KnowledgeWorkspace({
               fontSize: "12px",
             }}
           >
-            Ask With Scope
+            带范围提问
           </p>
           <h2
             style={{
@@ -438,17 +437,16 @@ export function KnowledgeWorkspace({
               letterSpacing: "-0.05em",
             }}
           >
-            Ask only what your sources can support.
+            只问资料能支撑的问题。
           </h2>
           <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.75 }}>
-            Use this space to compress reading into answers you can actually
-            cite, review, and turn into interview language later.
+            把阅读内容压缩成可引用的回答，再把这些回答转成后续面试时可复用的表达。
           </p>
         </div>
 
         <form onSubmit={handleQuestionSubmit} style={{ display: "grid", gap: "14px" }}>
           <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-            Scope
+            提问范围
             <select
               value={scope}
               onChange={(event) => setScope(event.target.value as KnowledgeScope)}
@@ -463,13 +461,13 @@ export function KnowledgeWorkspace({
           </label>
 
           <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-            Ask a source-bounded question
+            提一个带资料边界的问题
             <textarea
-              aria-label="Ask a source-bounded question"
+              aria-label="提一个带资料边界的问题"
               rows={5}
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              placeholder="What does this JD optimize for? What should I say about RAG evaluation? Which project evidence is strongest?"
+              placeholder="例如：这个岗位最看重什么？我该如何表达 RAG 评估？哪段项目经历最适合展开？"
               style={{ ...fieldStyle, resize: "vertical" }}
             />
           </label>
@@ -495,7 +493,7 @@ export function KnowledgeWorkspace({
               opacity: isAsking ? 0.72 : 1,
             }}
           >
-            {isAsking ? "Asking..." : "Ask Knowledge"}
+            {isAsking ? "提问中..." : "开始提问"}
           </button>
         </form>
 
@@ -520,9 +518,9 @@ export function KnowledgeWorkspace({
                 fontSize: "12px",
               }}
             >
-              Answer Surface
+              回答区
             </p>
-            <h3 style={{ margin: 0, fontSize: "20px" }}>Cited answer</h3>
+            <h3 style={{ margin: 0, fontSize: "20px" }}>带引用回答</h3>
           </div>
 
           {answer ? (
@@ -564,9 +562,7 @@ export function KnowledgeWorkspace({
             </>
           ) : (
             <p style={{ margin: 0, color: "#6f5d48", lineHeight: 1.7 }}>
-              Ask a bounded question once your source set is in place. The answer
-              will stay tied to saved material and surface citations instead of
-              turning into generic chat.
+              先准备好资料源，再开始提问。回答会始终绑定到已保存内容，并带上引用，而不是变成泛泛聊天。
             </p>
           )}
         </section>

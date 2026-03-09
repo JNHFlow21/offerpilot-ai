@@ -7,6 +7,7 @@ interface JdFormState {
   companyName: string;
   roleName: string;
   jdText: string;
+  sourceUrl: string;
 }
 
 async function readErrorMessage(
@@ -39,6 +40,7 @@ export function JdForm() {
     companyName: "",
     roleName: "",
     jdText: "",
+    sourceUrl: "",
   });
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -57,7 +59,7 @@ export function JdForm() {
 
       if (!createResponse.ok) {
         throw new Error(
-          await readErrorMessage(createResponse, "Failed to create job target."),
+          await readErrorMessage(createResponse, "创建岗位 JD 失败。"),
         );
       }
 
@@ -71,7 +73,7 @@ export function JdForm() {
         throw new Error(
           await readErrorMessage(
             analyzeResponse,
-            "Failed to analyze job description.",
+              "解析岗位 JD 失败。",
           ),
         );
       }
@@ -82,7 +84,7 @@ export function JdForm() {
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "Something went wrong.",
+          : "提交失败，请稍后重试。",
       );
     } finally {
       setIsSubmitting(false);
@@ -106,9 +108,9 @@ export function JdForm() {
       }}
     >
       <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-        Company Name
+        公司名称
         <input
-          aria-label="Company Name"
+          aria-label="公司名称"
           name="companyName"
           style={fieldStyle}
           value={form.companyName}
@@ -117,9 +119,9 @@ export function JdForm() {
       </label>
 
       <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-        Role Name
+        岗位名称
         <input
-          aria-label="Role Name"
+          aria-label="岗位名称"
           name="roleName"
           required
           style={fieldStyle}
@@ -129,15 +131,27 @@ export function JdForm() {
       </label>
 
       <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-        Job Description
+        岗位 JD
         <textarea
-          aria-label="Job Description"
+          aria-label="岗位 JD"
           name="jdText"
           required
           rows={10}
           style={{ ...fieldStyle, resize: "vertical" }}
           value={form.jdText}
           onChange={(event) => updateField("jdText", event.target.value)}
+        />
+      </label>
+
+      <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
+        岗位来源链接
+        <input
+          aria-label="岗位来源链接"
+          name="sourceUrl"
+          placeholder="https://jobs.example.com/..."
+          style={fieldStyle}
+          value={form.sourceUrl}
+          onChange={(event) => updateField("sourceUrl", event.target.value)}
         />
       </label>
 
@@ -160,7 +174,7 @@ export function JdForm() {
           opacity: isSubmitting ? 0.7 : 1,
         }}
       >
-        {isSubmitting ? "Analyzing..." : "Analyze JD"}
+        {isSubmitting ? "解析中..." : "保存并解析 JD"}
       </button>
     </form>
   );

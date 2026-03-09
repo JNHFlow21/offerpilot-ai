@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { PrepareWorkspace } from "@/components/prepare/prepare-workspace";
 
 describe("PrepareWorkspace", () => {
-  it("renders the resume input, rewrite output, and interview assist areas", () => {
+  it("renders the Chinese resume, rewrite, and interview sections", () => {
     render(
       <PrepareWorkspace
         initialWorkspace={null}
@@ -20,16 +20,16 @@ describe("PrepareWorkspace", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/resume text/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/target job/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/简历全文/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/目标岗位 jd/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /save resume workspace/i }),
+      screen.getByRole("button", { name: /保存简历/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /rewrite suggestions/i }),
+      screen.getByRole("heading", { name: /改写建议/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /interview assist/i }),
+      screen.getByRole("heading", { name: /模拟面试/i }),
     ).toBeInTheDocument();
   });
 });

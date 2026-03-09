@@ -35,19 +35,22 @@ describe("JdForm", () => {
 
     render(<JdForm />);
 
-    fireEvent.change(screen.getByLabelText(/company name/i), {
+    fireEvent.change(screen.getByLabelText(/公司名称/i), {
       target: { value: "bytedance" },
     });
-    fireEvent.change(screen.getByLabelText(/role name/i), {
+    fireEvent.change(screen.getByLabelText(/岗位名称/i), {
       target: { value: "AI产品实习生-TRAE" },
     });
-    fireEvent.change(screen.getByLabelText(/job description/i), {
+    fireEvent.change(screen.getByLabelText(/岗位 jd/i), {
       target: {
         value: "这是一个足够长的 JD 文本，用来验证错误信息是否能展示给用户。需要超过二十个字符。",
       },
     });
+    fireEvent.change(screen.getByLabelText(/岗位来源链接/i), {
+      target: { value: "https://jobs.bytedance.com/trae-ai-pm" },
+    });
 
-    fireEvent.submit(screen.getByRole("button", { name: /analyze jd/i }));
+    fireEvent.submit(screen.getByRole("button", { name: /保存并解析 jd/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/password authentication failed/i)).toBeInTheDocument();

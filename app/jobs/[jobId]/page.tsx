@@ -23,9 +23,9 @@ export default async function JobDetailPage({
             background: "#fff8ef",
           }}
         >
-          <h1 style={{ marginTop: 0 }}>Job target not found</h1>
+          <h1 style={{ marginTop: 0 }}>未找到该岗位 JD</h1>
           <p style={{ marginBottom: 0 }}>
-            Create a new JD target first, then return to this page.
+            请先保存一个新的岗位 JD，再回到这个页面。
           </p>
         </section>
       </main>
@@ -44,9 +44,9 @@ export default async function JobDetailPage({
             background: "#fff8ef",
           }}
         >
-          <h1 style={{ marginTop: 0 }}>Analysis pending</h1>
+          <h1 style={{ marginTop: 0 }}>JD 解析尚未完成</h1>
           <p style={{ marginBottom: 0 }}>
-            The JD has been captured, but analysis is not available yet.
+            岗位 JD 已保存，但结构化解析结果暂时还不可用。
           </p>
         </section>
       </main>

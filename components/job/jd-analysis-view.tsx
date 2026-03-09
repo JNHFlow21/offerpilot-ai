@@ -32,7 +32,7 @@ export function JdAnalysisView({
             fontSize: "12px",
           }}
         >
-          JD Analysis
+          JD 解析
         </p>
         <h1 style={{ margin: "10px 0 8px", fontSize: "40px", lineHeight: 1 }}>
           {roleName}
@@ -45,12 +45,12 @@ export function JdAnalysisView({
       </header>
 
       <section>
-        <h2 style={{ marginBottom: "10px" }}>Overall Summary</h2>
+        <h2 style={{ marginBottom: "10px" }}>整体判断</h2>
         <p style={{ margin: 0, lineHeight: 1.7 }}>{analysis.overallSummary}</p>
       </section>
 
       <section>
-        <h2 style={{ marginBottom: "10px" }}>Keywords</h2>
+        <h2 style={{ marginBottom: "10px" }}>关键词</h2>
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           {analysis.keywords.map((keyword) => (
             <span
@@ -69,7 +69,7 @@ export function JdAnalysisView({
       </section>
 
       <section>
-        <h2 style={{ marginBottom: "10px" }}>Capability Dimensions</h2>
+        <h2 style={{ marginBottom: "10px" }}>能力维度</h2>
         <div style={{ display: "grid", gap: "14px" }}>
           {analysis.capabilityDimensions.map((dimension) => (
             <article

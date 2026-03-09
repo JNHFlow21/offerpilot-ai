@@ -7,6 +7,7 @@ const createJobSchema = z.object({
   companyName: z.string().optional().default(""),
   roleName: z.string().min(1),
   jdText: z.string().min(20),
+  sourceUrl: z.string().url().optional().or(z.literal("")).default(""),
 });
 
 function formatRouteError(error: unknown) {

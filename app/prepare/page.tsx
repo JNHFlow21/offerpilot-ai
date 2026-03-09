@@ -43,7 +43,7 @@ export default async function PreparePage() {
               fontSize: "12px",
             }}
           >
-            Phase 3
+            单一工作台
           </p>
           <h1
             style={{
@@ -53,7 +53,7 @@ export default async function PreparePage() {
               letterSpacing: "-0.05em",
             }}
           >
-            Rewrite your story for one target role.
+            围绕一个目标岗位，完成简历改写与面试准备。
           </h1>
           <p
             style={{
@@ -63,9 +63,7 @@ export default async function PreparePage() {
               fontSize: "18px",
             }}
           >
-            Keep the workspace narrow: one resume, one target JD, one prep path. Save
-            the raw resume, tighten the positioning, then turn the rewritten bullets into
-            likely interview pressure.
+            这不是分散的工具集合，而是一条连续主路径：固定你的简历，选择一个目标岗位 JD，生成改写建议，再进入模拟面试。
           </p>
         </header>
 

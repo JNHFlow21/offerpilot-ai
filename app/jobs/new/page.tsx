@@ -31,13 +31,13 @@ export default async function NewJobPage() {
             fontSize: "12px",
           }}
         >
-          Step 1
+          第一步
         </p>
         <h1 style={{ margin: "12px 0", fontSize: "48px", lineHeight: 0.96 }}>
-          Add one target JD.
+          保存一个目标岗位 JD。
         </h1>
         <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.7 }}>
-          Keep the input narrow. One role, one JD, one preparation path.
+          一次只围绕一个岗位准备。保存 JD 后，后续改写建议和模拟面试都会围绕它展开。
         </p>
         <JdForm />
       </section>

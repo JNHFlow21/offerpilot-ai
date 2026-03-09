@@ -39,7 +39,7 @@ export default async function KnowledgePage() {
               fontSize: "12px",
             }}
           >
-            Phase 2
+            知识层
           </p>
           <h1
             style={{
@@ -49,7 +49,7 @@ export default async function KnowledgePage() {
               letterSpacing: "-0.05em",
             }}
           >
-            Build your bounded prep knowledge.
+            平台知识库与个人资料源。
           </h1>
           <p
             style={{
@@ -59,8 +59,7 @@ export default async function KnowledgePage() {
               fontSize: "18px",
             }}
           >
-            Save only the material you want the system to cite back. This is not
-            an open chat box. It is a source-bounded prep workspace.
+            这不是开放聊天窗口，而是带引用的资料层。平台后续会默认预置知识库，这里主要用于补充你自己的资料源。
           </p>
         </header>
 

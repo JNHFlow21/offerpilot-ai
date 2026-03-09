@@ -86,15 +86,15 @@ export function ProfileForm({
       });
 
       if (!response.ok) {
-        throw new Error(await readErrorMessage(response, "Failed to save profile."));
+        throw new Error(await readErrorMessage(response, "保存个人资料失败。"));
       }
 
-      setSavedMessage("Profile saved");
+      setSavedMessage("个人资料已保存。");
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "Failed to save profile.",
+          : "保存个人资料失败。",
       );
     } finally {
       setIsSaving(false);
@@ -117,9 +117,9 @@ export function ProfileForm({
         }}
       >
         <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-          Name
+          姓名
           <input
-            aria-label="Name"
+            aria-label="姓名"
             name="displayName"
             style={fieldStyle}
             value={form.displayName}
@@ -128,9 +128,9 @@ export function ProfileForm({
         </label>
 
         <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-          Target City
+          目标城市
           <input
-            aria-label="Target City"
+            aria-label="目标城市"
             name="targetCity"
             style={fieldStyle}
             value={form.targetCity}
@@ -140,11 +140,11 @@ export function ProfileForm({
       </div>
 
       <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-        Target Roles
+        目标岗位方向
         <input
-          aria-label="Target Roles"
+          aria-label="目标岗位方向"
           name="targetRoles"
-          placeholder="AI Product Intern, PM Intern"
+          placeholder="例如：AI 产品经理实习生、产品经理实习生"
           style={fieldStyle}
           value={form.targetRoles}
           onChange={(event) => updateField("targetRoles", event.target.value)}
@@ -152,9 +152,9 @@ export function ProfileForm({
       </label>
 
       <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-        Resume Summary
+        简历摘要
         <textarea
-          aria-label="Resume Summary"
+          aria-label="简历摘要"
           name="resumeSummary"
           rows={4}
           style={{ ...fieldStyle, resize: "vertical" }}
@@ -164,9 +164,9 @@ export function ProfileForm({
       </label>
 
       <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-        Self Intro Draft
+        自我介绍草稿
         <textarea
-          aria-label="Self Intro Draft"
+          aria-label="自我介绍草稿"
           name="selfIntroDraft"
           rows={5}
           style={{ ...fieldStyle, resize: "vertical" }}
@@ -176,9 +176,9 @@ export function ProfileForm({
       </label>
 
       <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-        Resume Text
+        简历全文
         <textarea
-          aria-label="Resume Text"
+          aria-label="简历全文"
           name="resumeText"
           rows={10}
           style={{ ...fieldStyle, resize: "vertical" }}
@@ -212,7 +212,7 @@ export function ProfileForm({
           opacity: isSaving ? 0.7 : 1,
         }}
       >
-        {isSaving ? "Saving..." : "Save Profile"}
+        {isSaving ? "保存中..." : "保存个人资料"}
       </button>
     </form>
   );

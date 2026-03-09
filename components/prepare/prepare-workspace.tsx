@@ -111,7 +111,7 @@ export function PrepareWorkspace({
     });
 
     if (!response.ok) {
-      throw new Error(await readErrorMessage(response, "Failed to save resume workspace."));
+      throw new Error(await readErrorMessage(response, "保存简历失败。"));
     }
 
     const data = (await response.json()) as { workspace: ResumeWorkspaceRecord };
@@ -121,7 +121,7 @@ export function PrepareWorkspace({
       resumeSummary: data.workspace.resumeSummary,
       keyProjectBullets: data.workspace.keyProjectBullets.join("\n"),
     }));
-    setSavedMessage("Resume workspace saved.");
+    setSavedMessage("简历工作区已保存。");
   }
 
   async function handleSaveWorkspace(event: React.FormEvent<HTMLFormElement>) {
@@ -133,11 +133,7 @@ export function PrepareWorkspace({
     try {
       await saveWorkspace();
     } catch (submissionError) {
-      setError(
-        submissionError instanceof Error
-          ? submissionError.message
-          : "Failed to save resume workspace.",
-      );
+      setError(submissionError instanceof Error ? submissionError.message : "保存简历失败。");
     } finally {
       setIsSaving(false);
     }
@@ -145,7 +141,7 @@ export function PrepareWorkspace({
 
   async function handleRewrite() {
     if (!form.jobId) {
-      setError("Select one target job before rewriting.");
+      setError("请先选择一个目标岗位 JD。");
       return;
     }
 
@@ -168,18 +164,16 @@ export function PrepareWorkspace({
       });
 
       if (!response.ok) {
-        throw new Error(await readErrorMessage(response, "Failed to rewrite resume."));
+        throw new Error(await readErrorMessage(response, "生成改写建议失败。"));
       }
 
       const data = (await response.json()) as { rewrite: ResumeRewriteRecord };
       setRewrite(data.rewrite);
       setAssist(null);
-      setSavedMessage("Rewrite generated.");
+      setSavedMessage("改写建议已生成。");
     } catch (submissionError) {
       setError(
-        submissionError instanceof Error
-          ? submissionError.message
-          : "Failed to rewrite resume.",
+        submissionError instanceof Error ? submissionError.message : "生成改写建议失败。",
       );
     } finally {
       setIsRewriting(false);
@@ -188,7 +182,7 @@ export function PrepareWorkspace({
 
   async function handleGenerateAssist() {
     if (!form.jobId) {
-      setError("Select one target job before generating interview assist.");
+      setError("请先选择一个目标岗位 JD。");
       return;
     }
 
@@ -212,19 +206,15 @@ export function PrepareWorkspace({
       });
 
       if (!response.ok) {
-        throw new Error(
-          await readErrorMessage(response, "Failed to generate interview assist."),
-        );
+        throw new Error(await readErrorMessage(response, "生成面试辅助失败。"));
       }
 
       const data = (await response.json()) as { assist: InterviewAssistResult };
       setAssist(data.assist);
-      setSavedMessage("Interview assist generated.");
+      setSavedMessage("面试辅助已生成。");
     } catch (submissionError) {
       setError(
-        submissionError instanceof Error
-          ? submissionError.message
-          : "Failed to generate interview assist.",
+        submissionError instanceof Error ? submissionError.message : "生成面试辅助失败。",
       );
     } finally {
       setIsGeneratingAssist(false);
@@ -251,28 +241,25 @@ export function PrepareWorkspace({
               fontSize: "12px",
             }}
           >
-            Input
+            步骤 1
           </p>
           <h2 style={{ margin: 0, fontSize: "28px", lineHeight: 1.02, letterSpacing: "-0.04em" }}>
-            Tighten one resume against one target.
+            我的简历
           </h2>
           <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.7 }}>
-            Save the raw material first. Then generate a rewrite that is closer to the JD
-            and easier to defend in an interview.
+            简历默认会绑定到你的账号。先保存当前简历版本，再围绕一个目标岗位生成改写建议。
           </p>
         </div>
 
         <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-          Target Job
+          步骤 2 · 目标岗位 JD
           <select
-            aria-label="Target Job"
+            aria-label="目标岗位 JD"
             value={form.jobId}
             onChange={(event) => updateField("jobId", event.target.value)}
             style={fieldStyle}
           >
-            {jobs.length === 0 ? (
-              <option value="">No saved JD yet</option>
-            ) : null}
+            {jobs.length === 0 ? <option value="">还没有已保存的 JD</option> : null}
             {jobs.map((job) => (
               <option key={job.id} value={job.id}>
                 {jobLabel(job)}
@@ -282,49 +269,49 @@ export function PrepareWorkspace({
         </label>
 
         <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-          Resume Text
+          简历全文
           <textarea
-            aria-label="Resume Text"
+            aria-label="简历全文"
             rows={14}
             value={form.rawResumeText}
             onChange={(event) => updateField("rawResumeText", event.target.value)}
-            placeholder="Paste the current version of your resume."
+            placeholder="粘贴你当前正在投递的简历内容。"
             style={{ ...fieldStyle, resize: "vertical" }}
           />
         </label>
 
         <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-          Resume Summary
+          简历摘要
           <textarea
-            aria-label="Resume Summary"
+            aria-label="简历摘要"
             rows={4}
             value={form.resumeSummary}
             onChange={(event) => updateField("resumeSummary", event.target.value)}
-            placeholder="Optional. If left blank, the system will infer one."
+            placeholder="可选。如果留空，系统会根据简历自动概括。"
             style={{ ...fieldStyle, resize: "vertical" }}
           />
         </label>
 
         <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-          Key Project Bullets
+          关键项目要点
           <textarea
-            aria-label="Key Project Bullets"
+            aria-label="关键项目要点"
             rows={6}
             value={form.keyProjectBullets}
             onChange={(event) => updateField("keyProjectBullets", event.target.value)}
-            placeholder="One bullet per line."
+            placeholder="每行一个项目要点。"
             style={{ ...fieldStyle, resize: "vertical" }}
           />
         </label>
 
         <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
-          Rewrite Focus
+          改写重点
           <textarea
-            aria-label="Rewrite Focus"
+            aria-label="改写重点"
             rows={4}
             value={form.rewriteFocus}
             onChange={(event) => updateField("rewriteFocus", event.target.value)}
-            placeholder="e.g. Emphasize AI PM ownership, metrics, and cross-functional decision-making."
+            placeholder="例如：突出 AI 产品 owner 意识、指标意识、跨团队推进和落地能力。"
             style={{ ...fieldStyle, resize: "vertical" }}
           />
         </label>
@@ -366,7 +353,7 @@ export function PrepareWorkspace({
               opacity: isSaving ? 0.72 : 1,
             }}
           >
-            {isSaving ? "Saving..." : "Save Resume Workspace"}
+            {isSaving ? "保存中..." : "保存简历"}
           </button>
 
           <button
@@ -384,7 +371,7 @@ export function PrepareWorkspace({
               opacity: isRewriting ? 0.72 : 1,
             }}
           >
-            {isRewriting ? "Rewriting..." : "Rewrite Resume"}
+            {isRewriting ? "生成中..." : "生成改写建议"}
           </button>
         </div>
       </form>
@@ -400,14 +387,13 @@ export function PrepareWorkspace({
               fontSize: "12px",
             }}
           >
-            Rewrite
+            步骤 3
           </p>
           <h2 style={{ margin: 0, fontSize: "28px", lineHeight: 1.02, letterSpacing: "-0.04em" }}>
-            Rewrite Suggestions
+            改写建议
           </h2>
           <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.7 }}>
-            The middle column is for positioning. It should tell you what to change,
-            why it aligns with the JD, and what new bullets are safe to claim.
+            这里不强制替你改简历，而是给出可解释的建议：该改哪里、为什么更贴岗位、哪些表达更适合出现在简历里。
           </p>
         </div>
 
@@ -420,7 +406,7 @@ export function PrepareWorkspace({
                 background: "rgba(246, 235, 218, 0.72)",
               }}
             >
-              <strong style={{ display: "block", marginBottom: "8px" }}>Rewrite Summary</strong>
+              <strong style={{ display: "block", marginBottom: "8px" }}>改写总览</strong>
               <p style={{ margin: 0, lineHeight: 1.7, color: "#3d2c1d" }}>{rewrite.rewriteSummary}</p>
             </div>
 
@@ -439,13 +425,15 @@ export function PrepareWorkspace({
                 >
                   <h3 style={{ margin: 0, fontSize: "18px" }}>{suggestion.sectionTitle}</h3>
                   <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.65 }}>
-                    <strong style={{ color: "#20170f" }}>Current issue:</strong> {suggestion.currentIssue}
+                    <strong style={{ color: "#20170f" }}>当前问题：</strong>
+                    {suggestion.currentIssue}
                   </p>
                   <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.65 }}>
-                    <strong style={{ color: "#20170f" }}>Change:</strong> {suggestion.recommendedChange}
+                    <strong style={{ color: "#20170f" }}>建议修改：</strong>
+                    {suggestion.recommendedChange}
                   </p>
                   <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.65 }}>
-                    <strong style={{ color: "#20170f" }}>Why this fits the JD:</strong>{" "}
+                    <strong style={{ color: "#20170f" }}>为什么更贴岗位：</strong>
                     {suggestion.jdAlignmentReason}
                   </p>
                 </article>
@@ -487,8 +475,7 @@ export function PrepareWorkspace({
               lineHeight: 1.7,
             }}
           >
-            Save the workspace and run one rewrite. This area will show section-level
-            changes and revised bullets you can actually defend in an interview.
+            先保存简历并生成一次改写建议。这里会展示分段建议和可落到简历上的新 bullet，方便你判断哪些内容值得吸收。
           </div>
         )}
       </section>
@@ -504,13 +491,13 @@ export function PrepareWorkspace({
               fontSize: "12px",
             }}
           >
-            Assist
+            步骤 4
           </p>
           <h2 style={{ margin: 0, fontSize: "28px", lineHeight: 1.02, letterSpacing: "-0.04em" }}>
-            Interview Assist
+            模拟面试
           </h2>
           <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.7 }}>
-            Use the rewritten story to predict what the interviewer will press on next.
+            基于当前简历、目标 JD 和平台知识库，先生成高频问题、追问点和答题框架，下一步再进入完整多轮面试。
           </p>
         </div>
 
@@ -530,7 +517,7 @@ export function PrepareWorkspace({
             opacity: isGeneratingAssist ? 0.72 : 1,
           }}
         >
-          {isGeneratingAssist ? "Generating..." : "Generate Interview Assist"}
+          {isGeneratingAssist ? "生成中..." : "生成模拟面试问题"}
         </button>
 
         {assist ? (
@@ -562,7 +549,7 @@ export function PrepareWorkspace({
                 <h3 style={{ margin: 0, fontSize: "18px", lineHeight: 1.45 }}>{item.question}</h3>
 
                 <div style={{ display: "grid", gap: "6px" }}>
-                  <strong>Likely Follow-ups</strong>
+                  <strong>可能追问</strong>
                   <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "6px" }}>
                     {item.followUps.map((followUp) => (
                       <li key={followUp} style={{ lineHeight: 1.6 }}>
@@ -573,7 +560,7 @@ export function PrepareWorkspace({
                 </div>
 
                 <div style={{ display: "grid", gap: "6px" }}>
-                  <strong>Answer Framework</strong>
+                  <strong>答题框架</strong>
                   <ol style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "6px" }}>
                     {item.answerFramework.map((point) => (
                       <li key={point} style={{ lineHeight: 1.6 }}>
@@ -585,7 +572,7 @@ export function PrepareWorkspace({
 
                 {item.citations.length > 0 ? (
                   <div style={{ display: "grid", gap: "6px" }}>
-                    <strong>Support</strong>
+                    <strong>知识支撑</strong>
                     {item.citations.map((citation) => (
                       <div
                         key={citation.chunkId}
@@ -623,14 +610,13 @@ export function PrepareWorkspace({
               lineHeight: 1.7,
             }}
           >
-            Generate the rewrite first. Then this panel will turn the new wording into likely
-            interviewer questions, follow-ups, and answer framing.
+            先生成一次面试辅助。这里会作为后续多轮 Agent 模拟面试的入口，而不是让用户自己先去拼凑问题。
           </div>
         )}
 
         {workspace && !rewrite ? (
           <p style={{ margin: 0, color: "#866747", fontSize: "14px" }}>
-            Current workspace updated at {new Date(workspace.updatedAt).toLocaleString()}.
+            当前简历最近更新于 {new Date(workspace.updatedAt).toLocaleString()}。
           </p>
         ) : null}
       </section>

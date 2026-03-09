@@ -7,10 +7,12 @@ vi.mock("@/lib/services/job-repository", () => ({
 
 describe("POST /api/jobs", () => {
   it("returns the created job id when persistence succeeds", async () => {
+    const createJob = vi.fn().mockResolvedValue({
+      id: "job-123",
+    });
+
     vi.mocked(getJobRepository).mockReturnValue({
-      createJob: vi.fn().mockResolvedValue({
-        id: "job-123",
-      }),
+      createJob,
     } as never);
 
     const request = new Request("http://localhost/api/jobs", {
@@ -22,6 +24,7 @@ describe("POST /api/jobs", () => {
         companyName: "bytedance",
         roleName: "AI产品实习生-TRAE",
         jdText: "这是一个足够长的 JD 文本，用来验证创建接口是否成功。需要超过二十个字符。",
+        sourceUrl: "https://jobs.bytedance.com/trae-ai-pm",
       }),
     });
 
@@ -30,6 +33,12 @@ describe("POST /api/jobs", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
       jobId: "job-123",
+    });
+    expect(createJob).toHaveBeenCalledWith({
+      companyName: "bytedance",
+      roleName: "AI产品实习生-TRAE",
+      jdText: "这是一个足够长的 JD 文本，用来验证创建接口是否成功。需要超过二十个字符。",
+      sourceUrl: "https://jobs.bytedance.com/trae-ai-pm",
     });
   });
 

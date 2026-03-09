@@ -5,12 +5,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "OfferPilot",
-  description: "AI interview prep copilot for AI and product candidates.",
+  description: "面向中文求职用户的 AI 求职准备工作台。",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body>{children}</body>
     </html>
   );

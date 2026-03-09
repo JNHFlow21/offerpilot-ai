@@ -65,12 +65,12 @@ describe("KnowledgeWorkspace", () => {
     render(<KnowledgeWorkspace />);
 
     expect(await screen.findByText(/ByteDance JD/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/ask a source-bounded question/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/提一个带资料边界的问题/i)).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText(/ask a source-bounded question/i), {
+    fireEvent.change(screen.getByLabelText(/提一个带资料边界的问题/i), {
       target: { value: "What does this JD care about most?" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: /ask knowledge/i }));
+    fireEvent.submit(screen.getByRole("button", { name: /开始提问/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/AI product workflow delivery/i)).toBeInTheDocument();

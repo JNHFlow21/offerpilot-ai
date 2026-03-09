@@ -42,7 +42,7 @@ export default async function ProfilePage() {
               fontSize: "12px",
             }}
           >
-            Phase 2
+            背景资料
           </p>
           <h1
             style={{
@@ -52,11 +52,10 @@ export default async function ProfilePage() {
               letterSpacing: "-0.05em",
             }}
           >
-            Build your prep profile.
+            固定你的求职基础信息。
           </h1>
           <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.7 }}>
-            Turn your raw background into reusable prep context. This page should
-            become the source of truth for every later module.
+            这页负责沉淀你长期复用的资料：目标岗位、城市、简历摘要、自我介绍和完整简历文本。
           </p>
           <div
             style={{
@@ -67,9 +66,9 @@ export default async function ProfilePage() {
               lineHeight: 1.6,
             }}
           >
-            <div>1. Lock target roles and location.</div>
-            <div>2. Compress your resume into reusable signals.</div>
-            <div>3. Draft the self-intro you can train against later.</div>
+            <div>1. 固定你的目标岗位和城市。</div>
+            <div>2. 把简历压缩成可复用的摘要与全文。</div>
+            <div>3. 提前准备可复用的自我介绍草稿。</div>
           </div>
         </aside>
 

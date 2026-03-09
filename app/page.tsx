@@ -31,7 +31,7 @@ export default function HomePage() {
             color: "#7a5e3a",
           }}
         >
-          AI Interview Prep Copilot
+          中文 AI 求职准备工作台
         </p>
         <h1
           style={{
@@ -52,8 +52,7 @@ export default function HomePage() {
             color: "#4b3a28",
           }}
         >
-          Turn one target JD into a structured preparation path, targeted
-          knowledge review, and measurable mock interview practice.
+          登录后保存你的简历与目标岗位 JD。系统会基于岗位要求和平台知识库给出改写建议，再继续进入模拟面试。
         </p>
         <div
           style={{
@@ -64,7 +63,7 @@ export default function HomePage() {
           }}
         >
           <Link
-            href="/jobs/new"
+            href="/login"
             style={{
               borderRadius: "999px",
               padding: "14px 20px",
@@ -73,7 +72,7 @@ export default function HomePage() {
               fontWeight: 600,
             }}
           >
-            Start with a JD
+            进入工作台
           </Link>
         </div>
       </section>
