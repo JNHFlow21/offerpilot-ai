@@ -1,4 +1,5 @@
 import {
+  createDefaultJdAnalysisClient,
   OpenAiJdAnalysisClient,
   type JdAnalysisClient,
 } from "@/lib/ai/clients";
@@ -17,7 +18,7 @@ export interface AnalyzeJobDescriptionInput {
 
 export async function analyzeJobDescription(
   input: AnalyzeJobDescriptionInput,
-  client: JdAnalysisClient = new OpenAiJdAnalysisClient(),
+  client: JdAnalysisClient = createDefaultJdAnalysisClient(),
 ): Promise<JdAnalysisResult> {
   const prompt = buildJdAnalysisPrompt(input);
   const rawResult = await client.analyzeJd({
@@ -31,7 +32,7 @@ export async function analyzeJobDescription(
 export async function runJdAnalysisForJob(
   jobId: string,
   repository: Pick<JobRepository, "getJobById" | "saveAnalysis">,
-  client: JdAnalysisClient = new OpenAiJdAnalysisClient(),
+  client: JdAnalysisClient = createDefaultJdAnalysisClient(),
 ) {
   const job = await repository.getJobById(jobId);
 

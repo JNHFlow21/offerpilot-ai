@@ -14,3 +14,4 @@
 - Replaced the temporary job store with a repository layer that supports memory fallback locally and Postgres persistence when `DATABASE_URL` is set.
 - Added `.env.example` and a cloud setup doc for Supabase + Vercel deployment.
 - Re-verified the repo with `pnpm test` and `pnpm build` after the persistence refactor.
+- Switched the default AI provider path to Gemini with OpenAI compatibility fallback.

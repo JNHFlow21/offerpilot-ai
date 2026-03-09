@@ -13,3 +13,5 @@
 - The Vercel MCP documentation tool currently requires auth in this environment, so Vercel doc lookup needs to fall back to official web docs.
 - `job_targets.user_id` must stay nullable until Supabase Auth is added; otherwise phase 1 JD persistence cannot work without a signed-in user.
 - The repository layer now uses Postgres automatically when `DATABASE_URL` exists, and fails fast in production if it does not.
+- There is no Supabase MCP or authenticated Supabase control plane access in this environment, so Supabase project creation still requires one manual user step.
+- The AI layer now defaults to Gemini when `GEMINI_API_KEY` is present and only falls back to OpenAI if Gemini is absent.

@@ -15,7 +15,7 @@ owner: 傅俊豪
 
 - 前端与 API：`Vercel`
 - 数据库：`Supabase Postgres`
-- 模型调用：`OpenAI API`
+- 模型调用：`Google Gemini API`
 
 这意味着用户最终使用的是一个网页产品，而不是自己配置数据库、RAG、embedding 或模型密钥。
 
@@ -31,14 +31,15 @@ owner: 傅俊豪
 当前 `JD 解析` 链路最少需要：
 
 - `DATABASE_URL`
-- `OPENAI_API_KEY`
+- `GEMINI_API_KEY`
 
 这些变量已经写入 [`.env.example`](/Users/fujunhao/Desktop/OfferPilot/.env.example)。
 
 说明：
 
 - `DATABASE_URL` 用于服务端通过 `Drizzle + postgres` 直连 Supabase Postgres
-- `OPENAI_API_KEY` 用于 `JD analysis workflow`
+- `GEMINI_API_KEY` 用于 `JD analysis workflow`
+- `OPENAI_API_KEY` 当前保留为兼容兜底，不是默认路径
 
 ## 3. 下一阶段会用到的 Supabase 环境变量
 
@@ -76,7 +77,8 @@ pnpm db:migrate
 1. 在 Vercel 导入这个 GitHub 仓库
 2. 在项目设置里添加环境变量：
    - `DATABASE_URL`
-   - `OPENAI_API_KEY`
+   - `GEMINI_API_KEY`
+   - `GEMINI_MODEL=gemini-3-flash-preview`
 3. 先发 Preview Deployment
 4. 验证 `JD 录入 -> 解析结果页` 走通后，再考虑 Production
 
@@ -87,11 +89,13 @@ pnpm db:migrate
 - 本地开发时，如果没有 `DATABASE_URL`，会退回内存 repository，方便前端/页面调试
 - 生产环境或 Vercel 环境下，如果没有 `DATABASE_URL`，会直接报错，避免“假上线”
 - 一旦补上 `DATABASE_URL`，`/api/jobs` 和 `/api/jobs/[jobId]/analyze` 就会切到真实数据库持久化路径
+- AI provider 默认优先选 `Gemini`；如果配置了 `GEMINI_API_KEY`，不会依赖 OpenAI
 
 ## 7. 官方文档参考
 
 - [Supabase Drizzle guide](https://supabase.com/docs/guides/database/drizzle)
 - [Supabase Postgres connection guide](https://supabase.com/docs/guides/database/connecting-to-postgres/serverless-drivers)
 - [Supabase Next.js SSR client guide](https://supabase.com/docs/guides/auth/server-side/nextjs)
+- [Google Gemini OpenAI compatibility](https://ai.google.dev/gemini-api/docs/openai)
 - [Vercel environment variables](https://vercel.com/docs/environment-variables)
 - [Vercel deployments](https://vercel.com/docs/deployments)
