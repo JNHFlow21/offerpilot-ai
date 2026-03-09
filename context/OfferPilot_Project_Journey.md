@@ -172,6 +172,8 @@ OfferPilot 的推荐开发顺序：
 - 绑定 GitHub 远端仓库 `JNHFlow21/offerpilot-ai`
 - 完成 Next.js 工程骨架、Vitest 测试环境、Drizzle phase 1 schema、JD analysis schema 和 workflow
 - 搭出第一版 `JD 录入 -> 解析结果页` 页面流，当前用内存 store 过渡，下一步接真实数据库
+- 完成 repository 重构：本地开发可用内存 fallback，配置 `DATABASE_URL` 后可切到真实 Postgres
+- 补充云端配置模板与部署说明，当前只差真实 Supabase / OpenAI 环境变量即可接云端
 ## 8. 更新规则
 
 后续每次有重要进展，都在这份文档补一条：

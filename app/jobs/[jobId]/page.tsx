@@ -1,7 +1,7 @@
 import React from "react";
 
 import { JdAnalysisView } from "@/components/job/jd-analysis-view";
-import { getJobRecord } from "@/lib/services/job-store";
+import { getJobRepository } from "@/lib/services/job-repository";
 
 export default async function JobDetailPage({
   params,
@@ -9,7 +9,7 @@ export default async function JobDetailPage({
   params: Promise<{ jobId: string }>;
 }) {
   const { jobId } = await params;
-  const record = getJobRecord(jobId);
+  const record = await getJobRepository().getJobById(jobId);
 
   if (!record) {
     return (

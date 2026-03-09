@@ -1,6 +1,8 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
+import * as schema from "@/lib/db/schema";
+
 let database: ReturnType<typeof drizzle> | null = null;
 
 export function getDb() {
@@ -14,7 +16,7 @@ export function getDb() {
     const client = postgres(connectionString, {
       prepare: false,
     });
-    database = drizzle(client);
+    database = drizzle(client, { schema });
   }
 
   return database;

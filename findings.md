@@ -7,3 +7,9 @@
 - The first homepage smoke test is passing with a minimal Next.js app shell.
 - `next build` succeeded and auto-added Next.js TypeScript plugin entries to `tsconfig.json`.
 - The first `/jobs` vertical slice works structurally, but job records are temporarily stored in memory rather than Postgres.
+- Supabase official docs support pairing Supabase Postgres with `Drizzle ORM` and direct Postgres connections for server-side access.
+- For the current phase, the right order is server-side Postgres persistence first, then Supabase Auth, then Vercel deployment with env vars.
+- Current shell environment does not expose `DATABASE_URL`, `OPENAI_API_KEY`, or Supabase public/service keys yet.
+- The Vercel MCP documentation tool currently requires auth in this environment, so Vercel doc lookup needs to fall back to official web docs.
+- `job_targets.user_id` must stay nullable until Supabase Auth is added; otherwise phase 1 JD persistence cannot work without a signed-in user.
+- The repository layer now uses Postgres automatically when `DATABASE_URL` exists, and fails fast in production if it does not.

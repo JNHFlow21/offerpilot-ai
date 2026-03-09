@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createJobRecord } from "@/lib/services/job-store";
+import { getJobRepository } from "@/lib/services/job-repository";
 
 const createJobSchema = z.object({
   companyName: z.string().optional().default(""),
@@ -12,7 +12,7 @@ const createJobSchema = z.object({
 export async function POST(request: Request) {
   const body = await request.json();
   const parsed = createJobSchema.parse(body);
-  const job = createJobRecord(parsed);
+  const job = await getJobRepository().createJob(parsed);
 
   return NextResponse.json({
     jobId: job.id,
