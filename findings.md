@@ -18,3 +18,6 @@
 - Runtime secrets for this app should live in `Vercel Environment Variables`, not GitHub repository secrets, unless GitHub Actions is later introduced.
 - Google official Gemini 3 documentation explicitly lists `gemini-3.1-pro-preview` as a valid model and migration target from deprecated `gemini-3-pro-preview`.
 - The Supabase direct connection string supplied from Project Overview failed to resolve in this environment, which matches Supabase docs that direct connections are IPv6-oriented and not the right default for serverless/transient runtimes.
+- The Supabase transaction pooler connection string successfully connected from this environment.
+- Both SQL migrations applied successfully to Supabase, and `job_targets.user_id` is now nullable in the live database.
+- A real Gemini `gemini-3.1-pro-preview` JD analysis call succeeded after normalizing human-readable `questionTypeWeights` labels.

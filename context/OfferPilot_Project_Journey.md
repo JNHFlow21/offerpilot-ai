@@ -174,6 +174,8 @@ OfferPilot 的推荐开发顺序：
 - 搭出第一版 `JD 录入 -> 解析结果页` 页面流，当前用内存 store 过渡，下一步接真实数据库
 - 完成 repository 重构：本地开发可用内存 fallback，配置 `DATABASE_URL` 后可切到真实 Postgres
 - 补充云端配置模板与部署说明，当前只差真实 Supabase / OpenAI 环境变量即可接云端
+- 已切换到 Gemini 作为默认模型，并确认 `gemini-3.1-pro-preview` 可实际完成 JD 解析
+- 已连接 Supabase Transaction Pooler，并把 phase 1 migration 真正执行到云端数据库
 ## 8. 更新规则
 
 后续每次有重要进展，都在这份文档补一条：

@@ -18,3 +18,6 @@
 - Added a dedicated Supabase `DATABASE_URL` setup tutorial and clarified runtime secret placement.
 - Set the default Gemini model to `gemini-3.1-pro-preview` and created a local `.env.local` for the current machine.
 - Verified the provided Supabase direct connection string is not the right `DATABASE_URL` for the current path, and updated local config/docs to require the transaction pooler string instead.
+- Connected to Supabase using the transaction pooler string and applied phase 1 SQL migrations.
+- Reproduced a real Gemini output/schema mismatch, added a failing test, and fixed it by normalizing question type labels before schema parse.
+- Verified a live Gemini JD analysis call now succeeds with the production model path.

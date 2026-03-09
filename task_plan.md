@@ -12,7 +12,7 @@ Build OfferPilot Phase 1 foundation and ship the first JD analysis vertical slic
 | Project bootstrap | complete | Next.js app, Vitest, and build pipeline are working |
 | Data and AI contracts | complete | Drizzle schema, SQL migration, and JD zod contracts are added |
 | JD analysis vertical slice | complete | Service, routes, and first pages now support DB-backed repository selection |
-| Verification and push | in_progress | Full test run and build passed after repository refactor |
+| Verification and push | in_progress | Live DB connection, migration, and Gemini validation are complete; syncing records and commit |
 
 ## Decisions
 
@@ -26,3 +26,4 @@ Build OfferPilot Phase 1 foundation and ship the first JD analysis vertical slic
 - Supabase credentials are not yet available, so data access code must be environment-safe.
 - Current `/jobs` flow uses an in-memory store as a bridge until real DB persistence is wired.
 - Cloud deployment is still blocked on real env values for `DATABASE_URL` and `OPENAI_API_KEY`.
+- Vercel preview deployment is still pending; local cloud prerequisites are now mostly ready.
