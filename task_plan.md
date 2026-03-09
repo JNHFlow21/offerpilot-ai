@@ -8,11 +8,11 @@ Build OfferPilot Phase 1 foundation and ship the first JD analysis vertical slic
 
 | Phase | Status | Notes |
 | --- | --- | --- |
-| Planning and setup | in_progress | Create implementation plan and working memory files |
-| Project bootstrap | in_progress | Next.js, Tailwind, Vitest, baseline app shell is working |
-| Data and AI contracts | pending | Drizzle schema, SQL migration, zod contracts |
-| JD analysis vertical slice | pending | Job service, routes, pages, tests |
-| Verification and push | pending | Run tests, update journey, commit and push |
+| Planning and setup | complete | Plan and working memory files are in place |
+| Project bootstrap | complete | Next.js app, Vitest, and build pipeline are working |
+| Data and AI contracts | complete | Drizzle schema, SQL migration, and JD zod contracts are added |
+| JD analysis vertical slice | in_progress | Service, routes, and first pages exist; persistence is still temporary |
+| Verification and push | in_progress | Full test run and build passed; preparing progress commit |
 
 ## Decisions
 
@@ -24,3 +24,4 @@ Build OfferPilot Phase 1 foundation and ship the first JD analysis vertical slic
 
 - Fresh repo means setup friction around Next/Vitest config.
 - Supabase credentials are not yet available, so data access code must be environment-safe.
+- Current `/jobs` flow uses an in-memory store as a bridge until real DB persistence is wired.

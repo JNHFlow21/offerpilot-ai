@@ -170,6 +170,8 @@ OfferPilot 的推荐开发顺序：
 - 新增本行程文档，并补充完整开发流程图
 - 初始化 `/Users/fujunhao/Desktop/OfferPilot` 独立 Git 仓库
 - 绑定 GitHub 远端仓库 `JNHFlow21/offerpilot-ai`
+- 完成 Next.js 工程骨架、Vitest 测试环境、Drizzle phase 1 schema、JD analysis schema 和 workflow
+- 搭出第一版 `JD 录入 -> 解析结果页` 页面流，当前用内存 store 过渡，下一步接真实数据库
 ## 8. 更新规则
 
 后续每次有重要进展，都在这份文档补一条：
