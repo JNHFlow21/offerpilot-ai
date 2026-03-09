@@ -151,44 +151,45 @@ OfferPilot 的推荐开发顺序：
 ### 已完成
 
 - [x] `模块一：JD 解析`
+- [x] `模块二：知识库问答`
 - [x] `/jobs/new -> /api/jobs -> /api/jobs/[jobId]/analyze -> /jobs/[jobId]`
 - [x] `job_targets` / `jd_analyses` 真实落库到 Supabase
 - [x] `gemini-3.1-pro-preview` 真实解析 JD 并返回结构化结果
 - [x] Vercel 生产环境部署完成并验证 JD 解析链路可用
+- [x] `/knowledge -> /api/knowledge/sources -> /api/knowledge/ask` 第一版知识库闭环
+- [x] `knowledge_sources` / `knowledge_chunks` 真实落库到 Supabase
+- [x] 第一版 source-bounded retrieval + citations 工作台已完成
 
 ### 进行中
 
-- [ ] `模块二：知识库问答`
 - [ ] `模块三：模拟面试`
 - [ ] `模块四：练习记录与薄弱项追踪`
 
 ### 当前未做完的关键基础设施
 
 - [x] `profile` 页面和用户背景持久化
-- [ ] `knowledge_sources` / `knowledge_chunks` 表与 RAG 检索链路
+- [x] `knowledge_sources` / `knowledge_chunks` 表与第一版检索链路
 - [ ] `interview_sessions` / `interview_turns` 表与评分 workflow
 - [ ] `records` 聚合页和薄弱项规则计算
 - [ ] Supabase 项目 link 本地目录稳定化
 
 ## 7. 当前下一步
 
-下一阶段不再扩散，直接进入 **MVP Phase 2：个人背景 + 知识库问答**。
+下一阶段不再扩散，直接进入 **MVP Phase 3：模拟面试**。
 
 执行顺序固定为：
 
-1. 完成 `profile` 页面与 `user_profiles` 真实读写
-2. 补 `knowledge_sources`、`knowledge_chunks` schema / migration
-3. 建知识入库流程：
-   - JD
-   - 简历文本
-   - 项目经历
-   - 手动粘贴的面经/知识笔记
-4. 接第一版检索问答：
-   - `POST /api/knowledge/ask`
-   - 带来源引用
-   - 只回答绑定知识范围内的问题
-5. 做 `/knowledge` 页面闭环
-6. 再进入 `interview` 和 `records`
+1. 补 `interview_sessions`、`interview_turns` schema / migration
+2. 建第一版模拟面试会话流：
+   - 选择目标岗位
+   - 生成单题或整轮问题
+   - 保存每一轮问答 turn
+3. 接评分与复盘 workflow：
+   - 回答得分
+   - 维度反馈
+   - 下一题追问建议
+4. 做 `/interview` 页面闭环
+5. 再进入 `records` 与薄弱项聚合
 
 对应实现计划：
 
@@ -213,6 +214,8 @@ OfferPilot 的推荐开发顺序：
 - 已定位并修复生产环境 `DATABASE_URL` 密码错误，`/api/jobs` 与 `/api/jobs/[jobId]/analyze` 已返回 `200`
 - 已确认 MVP 第一个功能 `JD 解析` 正式完成
 - 已完成 Phase 2 第一条切片：`/profile + /api/profile + user_profiles` 真实持久化
+- 已完成 Phase 2 第二条切片：`knowledge_sources + knowledge_chunks + /api/knowledge/* + /knowledge`
+- 已把 `0004_add_knowledge_tables.sql` 执行到 Supabase，并完成第一版 source-bounded retrieval + citations
 
 ## 9. 更新规则
 
