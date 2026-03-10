@@ -1,6 +1,5 @@
-import { PDFParse } from "pdf-parse";
-
 async function parsePdfBuffer(buffer: Buffer) {
+  const { PDFParse } = await import("pdf-parse");
   const parser = new PDFParse({ data: buffer });
 
   try {
