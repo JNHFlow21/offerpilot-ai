@@ -30,6 +30,41 @@ interface PrepareFormState {
   sourceUrl: string;
 }
 
+interface InterviewQuestionView {
+  id: string;
+  question: string;
+}
+
+interface InterviewProgressView {
+  current: number;
+  total: number;
+}
+
+interface InterviewFeedbackView {
+  score: number;
+  feedback: string;
+}
+
+interface InterviewStartResponse {
+  session: {
+    id: string;
+    status?: "in_progress" | "completed";
+  };
+  currentQuestion: InterviewQuestionView | null;
+  progress: InterviewProgressView;
+  overview: string;
+}
+
+interface InterviewTurnResponse {
+  session: {
+    id: string;
+    status: "in_progress" | "completed";
+  };
+  currentQuestion: InterviewQuestionView | null;
+  lastFeedback: InterviewFeedbackView;
+  progress: InterviewProgressView;
+}
+
 async function readErrorMessage(response: Response, fallbackMessage: string) {
   try {
     const data = (await response.json()) as { error?: string };
@@ -60,6 +95,16 @@ export function PrepareWorkspace({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [interviewSessionId, setInterviewSessionId] = useState<string | null>(null);
+  const [interviewStatus, setInterviewStatus] = useState<"idle" | "in_progress" | "completed">("idle");
+  const [interviewOverview, setInterviewOverview] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<InterviewQuestionView | null>(null);
+  const [interviewProgress, setInterviewProgress] = useState<InterviewProgressView | null>(null);
+  const [answerDraft, setAnswerDraft] = useState("");
+  const [lastFeedback, setLastFeedback] = useState<InterviewFeedbackView | null>(null);
+  const [interviewError, setInterviewError] = useState<string | null>(null);
+  const [isStartingInterview, setIsStartingInterview] = useState(false);
+  const [isSubmittingInterviewAnswer, setIsSubmittingInterviewAnswer] = useState(false);
 
   function updateField<Key extends keyof PrepareFormState>(
     key: Key,
@@ -108,11 +153,104 @@ export function PrepareWorkspace({
       setWorkspace(data.workspace);
       setJob(data.job);
       setRewrite(data.rewrite);
+      setInterviewSessionId(null);
+      setInterviewStatus("idle");
+      setInterviewOverview(null);
+      setCurrentQuestion(null);
+      setInterviewProgress(null);
+      setAnswerDraft("");
+      setLastFeedback(null);
+      setInterviewError(null);
       setSavedMessage("准备方案已生成。系统已先完成简历提取、JD 解析和改写建议。下一步进入模拟面试。");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "生成准备方案失败。");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleStartInterview() {
+    if (!job) {
+      setInterviewError("请先完成岗位 JD 提交。");
+      return;
+    }
+
+    setIsStartingInterview(true);
+    setInterviewError(null);
+
+    try {
+      const response = await fetch("/api/interview/start", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          jobId: job.id,
+          knowledgeScope: "all",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await readErrorMessage(response, "启动模拟面试失败。"));
+      }
+
+      const data = (await response.json()) as InterviewStartResponse;
+      setInterviewSessionId(data.session.id);
+      setInterviewStatus(data.session.status ?? "in_progress");
+      setInterviewOverview(data.overview);
+      setCurrentQuestion(data.currentQuestion);
+      setInterviewProgress(data.progress);
+      setAnswerDraft("");
+      setLastFeedback(null);
+    } catch (startError) {
+      setInterviewError(startError instanceof Error ? startError.message : "启动模拟面试失败。");
+    } finally {
+      setIsStartingInterview(false);
+    }
+  }
+
+  async function handleSubmitInterviewAnswer(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!interviewSessionId) {
+      setInterviewError("请先启动模拟面试。");
+      return;
+    }
+
+    if (!answerDraft.trim()) {
+      setInterviewError("请先填写你的回答。");
+      return;
+    }
+
+    setIsSubmittingInterviewAnswer(true);
+    setInterviewError(null);
+
+    try {
+      const response = await fetch("/api/interview/turn", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: interviewSessionId,
+          answer: answerDraft.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await readErrorMessage(response, "提交面试回答失败。"));
+      }
+
+      const data = (await response.json()) as InterviewTurnResponse;
+      setInterviewStatus(data.session.status);
+      setCurrentQuestion(data.currentQuestion);
+      setInterviewProgress(data.progress);
+      setLastFeedback(data.lastFeedback);
+      setAnswerDraft("");
+    } catch (turnError) {
+      setInterviewError(turnError instanceof Error ? turnError.message : "提交面试回答失败。");
+    } finally {
+      setIsSubmittingInterviewAnswer(false);
     }
   }
 
@@ -390,32 +528,147 @@ export function PrepareWorkspace({
 
         {rewrite ? (
           <div style={{ display: "grid", gap: "14px" }}>
-            <button
-              type="button"
-              style={{
-                width: "fit-content",
-                border: 0,
-                borderRadius: "999px",
-                padding: "14px 18px",
-                background: "#20170f",
-                color: "#fff8ec",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              开始模拟面试
-            </button>
-            <div
-              style={{
-                borderRadius: "24px",
-                border: "1px dashed rgba(73, 54, 31, 0.24)",
-                padding: "22px",
-                color: "#5c4732",
-                lineHeight: 1.7,
-              }}
-            >
-              下一步会进入一问一答的模拟面试。系统会基于当前 JD、改写后的简历重点和平台知识库，逐题提问、逐题追问。
-            </div>
+            {interviewStatus === "idle" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleStartInterview}
+                  disabled={isStartingInterview}
+                  style={{
+                    width: "fit-content",
+                    border: 0,
+                    borderRadius: "999px",
+                    padding: "14px 18px",
+                    background: "#20170f",
+                    color: "#fff8ec",
+                    fontWeight: 700,
+                    cursor: isStartingInterview ? "progress" : "pointer",
+                    opacity: isStartingInterview ? 0.72 : 1,
+                  }}
+                >
+                  {isStartingInterview ? "正在进入模拟面试..." : "开始模拟面试"}
+                </button>
+                <div
+                  style={{
+                    borderRadius: "24px",
+                    border: "1px dashed rgba(73, 54, 31, 0.24)",
+                    padding: "22px",
+                    color: "#5c4732",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  下一步会进入一问一答的模拟面试。系统会基于当前 JD、改写后的简历重点和平台知识库，逐题提问、逐题追问。
+                </div>
+              </>
+            ) : null}
+
+            {interviewOverview ? (
+              <div
+                style={{
+                  borderRadius: "20px",
+                  padding: "16px",
+                  background: "rgba(246, 235, 218, 0.72)",
+                  color: "#3d2c1d",
+                  lineHeight: 1.7,
+                }}
+              >
+                <strong style={{ display: "block", marginBottom: "8px", color: "#20170f" }}>
+                  面试策略概览
+                </strong>
+                {interviewOverview}
+              </div>
+            ) : null}
+
+            {interviewProgress ? (
+              <p style={{ margin: 0, color: "#5c4732", fontSize: "14px" }}>
+                当前进度：第 {interviewProgress.current} 题 / 共 {interviewProgress.total} 题
+              </p>
+            ) : null}
+
+            {currentQuestion ? (
+              <form onSubmit={handleSubmitInterviewAnswer} style={{ display: "grid", gap: "14px" }}>
+                <div
+                  style={{
+                    borderRadius: "22px",
+                    border: "1px solid rgba(73, 54, 31, 0.12)",
+                    padding: "18px",
+                    background: "rgba(255, 252, 247, 0.92)",
+                    display: "grid",
+                    gap: "10px",
+                  }}
+                >
+                  <strong style={{ color: "#20170f" }}>当前题目</strong>
+                  <p style={{ margin: 0, color: "#3d2c1d", lineHeight: 1.7 }}>{currentQuestion.question}</p>
+                </div>
+
+                <label style={{ display: "grid", gap: "8px", fontWeight: 600 }}>
+                  我的回答
+                  <textarea
+                    aria-label="我的回答"
+                    rows={6}
+                    value={answerDraft}
+                    onChange={(event) => setAnswerDraft(event.target.value)}
+                    style={{ ...fieldStyle, resize: "vertical" }}
+                    placeholder="先按你的真实想法回答，系统会基于这一题继续追问。"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingInterviewAnswer}
+                  style={{
+                    width: "fit-content",
+                    border: 0,
+                    borderRadius: "999px",
+                    padding: "14px 18px",
+                    background: "#20170f",
+                    color: "#fff8ec",
+                    fontWeight: 700,
+                    cursor: isSubmittingInterviewAnswer ? "progress" : "pointer",
+                    opacity: isSubmittingInterviewAnswer ? 0.72 : 1,
+                  }}
+                >
+                  {isSubmittingInterviewAnswer ? "提交中..." : "提交这一题"}
+                </button>
+              </form>
+            ) : null}
+
+            {lastFeedback ? (
+              <div
+                style={{
+                  borderRadius: "20px",
+                  padding: "16px",
+                  background: "rgba(246, 235, 218, 0.72)",
+                  color: "#3d2c1d",
+                  lineHeight: 1.7,
+                }}
+              >
+                <strong style={{ display: "block", marginBottom: "8px", color: "#20170f" }}>
+                  刚刚这一题的反馈
+                </strong>
+                <p style={{ margin: 0, marginBottom: "6px" }}>评分：{lastFeedback.score} / 5</p>
+                <p style={{ margin: 0 }}>{lastFeedback.feedback}</p>
+              </div>
+            ) : null}
+
+            {interviewStatus === "completed" ? (
+              <div
+                style={{
+                  borderRadius: "24px",
+                  border: "1px solid rgba(23, 100, 72, 0.18)",
+                  padding: "22px",
+                  background: "rgba(235, 248, 241, 0.72)",
+                  color: "#124734",
+                  lineHeight: 1.7,
+                }}
+              >
+                本轮模拟面试已经完成。你已经拿到逐题反馈，下一步可以回头吸收改写建议，再继续下一轮练习。
+              </div>
+            ) : null}
+
+            {interviewError ? (
+              <p style={{ margin: 0, color: "#b42318", fontSize: "14px" }}>{interviewError}</p>
+            ) : null}
           </div>
         ) : (
           <div

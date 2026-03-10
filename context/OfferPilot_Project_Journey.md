@@ -162,21 +162,23 @@ OfferPilot 的推荐开发顺序：
 - [x] 第一版 source-bounded retrieval + citations 工作台已完成
 - [x] `profile` 页面和用户背景持久化
 - [x] `resume_workspaces + resume_rewrites + /api/resume + /api/resume/rewrite + /api/interview/assist + /prepare`
+- [x] `中文单工作台骨架 + 登录入口 + PDF 简历上传入口 + JD 来源 URL`
+- [x] `interview_sessions` / `interview_turns` 表与一问一答模拟面试 API`
+- [x] `prepare staged fast path：先返回改写建议，再启动模拟面试`
 
 ### 进行中
 
-- [ ] `单工作台 IA 重构`
-- [ ] `登录系统`
-- [ ] `PDF 简历上传与结构化`
-- [ ] `后续能力：模拟面试`
+- [ ] `单工作台体验继续压缩与提速`
+- [ ] `登录系统 OAuth 完整接通`
+- [ ] `PDF 原文件持久化到 Supabase Storage`
 - [ ] `后续能力：记录与薄弱项追踪`
 
 ### 当前未做完的关键基础设施
 
 - [x] `knowledge_sources` / `knowledge_chunks` 表与第一版检索链路
 - [x] `resume_workspaces` / `resume_rewrites` 表与改写 workflow
-- [ ] `interview_sessions` / `interview_turns` 表与评分 workflow
-- [ ] `resume_files` 或等价的文件存储映射
+- [x] `interview_sessions` / `interview_turns` 表与评分 workflow
+- [ ] `resume_files` 或等价的文件存储映射`
 - [ ] `records` 聚合页和薄弱项规则计算
 - [ ] Supabase 项目 link 本地目录稳定化
 
@@ -228,6 +230,16 @@ OfferPilot 的推荐开发顺序：
 - 已完成 Phase 3：`resume_workspaces + resume_rewrites + /api/resume + /api/resume/rewrite + /api/interview/assist + /prepare`
 - 已把 `0005_add_resume_rewrite_tables.sql` 执行到 Supabase，并通过 `pnpm test` / `pnpm build`
 - 已确认主路径体验仍然过于分散，下一步不继续堆页面，而是重构为中文单工作台
+
+### 2026-03-10
+
+- 已完成性能重构第一刀：`/prepare` 改成 staged fast path，先完成 `PDF 简历解析 + JD 解析 + 简历改写`，不再把面试辅助绑在第一次提交里
+- 已切分 Gemini 模型职责：`JD 解析` 使用更快的 Flash 模型，`简历改写` 与 `面试评估` 继续使用 Pro 模型
+- 已新增 `interview_sessions` / `interview_turns`、`/api/interview/start`、`/api/interview/turn`
+- 已把模拟面试改成真正的一问一答：启动 session、当前题目、提交回答、反馈、追问 / 下一题
+- 已将 `0006_add_interview_session_tables.sql` 执行到 Supabase
+- 已通过 `pnpm test` / `pnpm build` 全量验证
+- 下一步聚焦：进一步压缩首屏等待时间、补齐 PDF 文件持久化、完善真实登录后用户态与记录沉淀
 
 ## 9. 更新规则
 

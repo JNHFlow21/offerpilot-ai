@@ -1,4 +1,6 @@
 export * from "./jd-analyses";
+export * from "./interview-sessions";
+export * from "./interview-turns";
 export * from "./job-targets";
 export * from "./knowledge-chunks";
 export * from "./knowledge-sources";
