@@ -2,6 +2,10 @@
 
 import React, { useState } from "react";
 
+import {
+  getAuthRedirectUrl,
+  isOAuthProviderEnabled,
+} from "@/lib/supabase/auth-config";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 const fieldStyle = {
@@ -23,6 +27,8 @@ export function LoginPanel() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const googleEnabled = isOAuthProviderEnabled("google");
+  const githubEnabled = isOAuthProviderEnabled("github");
 
   async function handleEmailLogin() {
     setIsSubmitting(true);
@@ -34,7 +40,7 @@ export function LoginPanel() {
       const { error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: getAuthRedirectUrl(),
         },
       });
 
@@ -59,7 +65,7 @@ export function LoginPanel() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getAuthRedirectUrl(),
         },
       });
 
@@ -138,39 +144,49 @@ export function LoginPanel() {
           邮箱登录
         </button>
 
-        <button
-          type="button"
-          onClick={() => void handleOAuthLogin("google")}
-          disabled={isSubmitting}
-          style={{
-            borderRadius: "999px",
-            padding: "14px 18px",
-            background: "rgba(255, 252, 247, 0.92)",
-            border: "1px solid rgba(73, 54, 31, 0.12)",
-            color: "#20170f",
-            fontWeight: 700,
-            cursor: isSubmitting ? "progress" : "pointer",
-          }}
-        >
-          Google 登录
-        </button>
+        {googleEnabled ? (
+          <button
+            type="button"
+            onClick={() => void handleOAuthLogin("google")}
+            disabled={isSubmitting}
+            style={{
+              borderRadius: "999px",
+              padding: "14px 18px",
+              background: "rgba(255, 252, 247, 0.92)",
+              border: "1px solid rgba(73, 54, 31, 0.12)",
+              color: "#20170f",
+              fontWeight: 700,
+              cursor: isSubmitting ? "progress" : "pointer",
+            }}
+          >
+            Google 登录
+          </button>
+        ) : null}
 
-        <button
-          type="button"
-          onClick={() => void handleOAuthLogin("github")}
-          disabled={isSubmitting}
-          style={{
-            borderRadius: "999px",
-            padding: "14px 18px",
-            background: "rgba(255, 252, 247, 0.92)",
-            border: "1px solid rgba(73, 54, 31, 0.12)",
-            color: "#20170f",
-            fontWeight: 700,
-            cursor: isSubmitting ? "progress" : "pointer",
-          }}
-        >
-          GitHub 登录
-        </button>
+        {githubEnabled ? (
+          <button
+            type="button"
+            onClick={() => void handleOAuthLogin("github")}
+            disabled={isSubmitting}
+            style={{
+              borderRadius: "999px",
+              padding: "14px 18px",
+              background: "rgba(255, 252, 247, 0.92)",
+              border: "1px solid rgba(73, 54, 31, 0.12)",
+              color: "#20170f",
+              fontWeight: 700,
+              cursor: isSubmitting ? "progress" : "pointer",
+            }}
+          >
+            GitHub 登录
+          </button>
+        ) : null}
+
+        {!googleEnabled && !githubEnabled ? (
+          <p style={{ margin: 0, color: "#6f5d48", fontSize: "14px", lineHeight: 1.6 }}>
+            Google 和 GitHub 登录暂未开放，请先使用邮箱登录。
+          </p>
+        ) : null}
       </div>
     </section>
   );
