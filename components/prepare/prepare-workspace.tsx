@@ -43,6 +43,7 @@ interface InterviewProgressView {
 interface InterviewFeedbackView {
   score: number;
   feedback: string;
+  referenceAnswer: string;
 }
 
 interface InterviewStartResponse {
@@ -75,8 +76,10 @@ async function readErrorMessage(response: Response, fallbackMessage: string) {
 }
 
 export function PrepareWorkspace({
+  currentUserEmail,
   initialWorkspace,
 }: {
+  currentUserEmail?: string;
   initialWorkspace?: ResumeWorkspaceRecord | null;
   initialJobs?: JobRecord[];
 }) {
@@ -264,6 +267,20 @@ export function PrepareWorkspace({
       }}
     >
       <form onSubmit={handleSubmit} style={{ ...panelStyle, display: "grid", gap: "16px" }}>
+        {currentUserEmail ? (
+          <div
+            style={{
+              borderRadius: "18px",
+              padding: "12px 14px",
+              background: "rgba(246, 235, 218, 0.72)",
+              color: "#5c4732",
+              fontSize: "14px",
+            }}
+          >
+            当前登录账号：{currentUserEmail}
+          </div>
+        ) : null}
+
         <div style={{ display: "grid", gap: "8px" }}>
           <p
             style={{
@@ -647,7 +664,20 @@ export function PrepareWorkspace({
                   刚刚这一题的反馈
                 </strong>
                 <p style={{ margin: 0, marginBottom: "6px" }}>评分：{lastFeedback.score} / 5</p>
-                <p style={{ margin: 0 }}>{lastFeedback.feedback}</p>
+                <p style={{ margin: 0, marginBottom: "12px" }}>{lastFeedback.feedback}</p>
+                <div
+                  style={{
+                    borderRadius: "16px",
+                    padding: "12px 14px",
+                    background: "rgba(255, 252, 247, 0.92)",
+                    color: "#3d2c1d",
+                  }}
+                >
+                  <strong style={{ display: "block", marginBottom: "6px", color: "#20170f" }}>
+                    参考答案
+                  </strong>
+                  <p style={{ margin: 0, lineHeight: 1.7 }}>{lastFeedback.referenceAnswer}</p>
+                </div>
               </div>
             ) : null}
 

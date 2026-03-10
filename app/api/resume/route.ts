@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { resumeWorkspaceInputSchema } from "@/lib/ai/schemas/resume-workspace";
+import {
+  isUnauthorizedError,
+  requireCurrentUser,
+} from "@/lib/auth/current-user";
 import { getResumeWorkspaceStore } from "@/lib/services/resume-workspace-service";
 
 function formatRouteError(error: unknown) {
@@ -33,12 +37,17 @@ function formatRouteError(error: unknown) {
 
 export async function GET() {
   try {
-    const workspace = await getResumeWorkspaceStore().getCurrentWorkspace();
+    const user = await requireCurrentUser();
+    const workspace = await getResumeWorkspaceStore().getCurrentWorkspace(user.id);
 
     return NextResponse.json({
       workspace,
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+
     return NextResponse.json(
       { error: formatRouteError(error) },
       { status: 500 },
@@ -48,14 +57,19 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await requireCurrentUser();
     const body = await request.json();
     const parsed = resumeWorkspaceInputSchema.parse(body);
-    const workspace = await getResumeWorkspaceStore().upsertCurrentWorkspace(parsed);
+    const workspace = await getResumeWorkspaceStore().upsertCurrentWorkspace(user.id, parsed);
 
     return NextResponse.json({
       workspace,
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+
     return NextResponse.json(
       { error: formatRouteError(error) },
       { status: 500 },

@@ -1,5 +1,12 @@
 import { GET, POST } from "@/app/api/resume/route";
+import { requireCurrentUser } from "@/lib/auth/current-user";
 import { getResumeWorkspaceStore } from "@/lib/services/resume-workspace-service";
+
+vi.mock("@/lib/auth/current-user", () => ({
+  requireCurrentUser: vi.fn(),
+  isUnauthorizedError: (error: unknown) =>
+    error instanceof Error && error.message === "请先登录后再继续。",
+}));
 
 vi.mock("@/lib/services/resume-workspace-service", () => ({
   getResumeWorkspaceStore: vi.fn(),
@@ -7,6 +14,10 @@ vi.mock("@/lib/services/resume-workspace-service", () => ({
 
 describe("resume route", () => {
   it("returns an empty payload when the workspace does not exist", async () => {
+    vi.mocked(requireCurrentUser).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+    } as never);
     vi.mocked(getResumeWorkspaceStore).mockReturnValue({
       getCurrentWorkspace: vi.fn().mockResolvedValue(null),
     } as never);
@@ -20,6 +31,10 @@ describe("resume route", () => {
   });
 
   it("upserts the current workspace and returns the saved payload", async () => {
+    vi.mocked(requireCurrentUser).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+    } as never);
     vi.mocked(getResumeWorkspaceStore).mockReturnValue({
       upsertCurrentWorkspace: vi.fn().mockResolvedValue({
         id: "workspace-123",

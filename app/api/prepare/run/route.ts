@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { isUnauthorizedError, requireCurrentUser } from "@/lib/auth/current-user";
 import { extractResumeTextFromPdfFile } from "@/lib/services/pdf-resume";
 import { runPreparePipeline } from "@/lib/services/prepare-run-service";
 
@@ -9,6 +10,7 @@ function formatRouteError(error: unknown) {
 
 export async function POST(request: Request) {
   try {
+    const user = await requireCurrentUser();
     const formData = await request.formData();
     const resumeFile = formData.get("resumeFile");
     const companyName = `${formData.get("companyName") ?? ""}`.trim();
@@ -29,6 +31,7 @@ export async function POST(request: Request) {
 
     const resumeText = await extractResumeTextFromPdfFile(resumeFile);
     const result = await runPreparePipeline({
+      userId: user.id,
       companyName,
       roleName,
       jdText,
@@ -38,6 +41,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+
     return NextResponse.json({ error: formatRouteError(error) }, { status: 500 });
   }
 }

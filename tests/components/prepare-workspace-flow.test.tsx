@@ -89,6 +89,7 @@ describe("PrepareWorkspace flow", () => {
           lastFeedback: {
             score: 4,
             feedback: "回答结构清楚，但可以补充更直接的岗位动机。",
+            referenceAnswer: "可以先讲背景，再讲为什么想做 AI 产品，最后补一段相关项目证据。",
           },
           progress: { current: 2, total: 2 },
         }),
@@ -126,6 +127,7 @@ describe("PrepareWorkspace flow", () => {
     await screen.findByText(/你做过最能体现产品判断的一段项目是什么/i);
     await waitFor(() => {
       expect(screen.getByText(/回答结构清楚，但可以补充更直接的岗位动机/i)).toBeInTheDocument();
+      expect(screen.getByText(/先讲背景，再讲为什么想做 AI 产品/i)).toBeInTheDocument();
     });
   });
 });

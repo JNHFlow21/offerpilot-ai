@@ -3,14 +3,19 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 
 import { getGeminiInterviewModel, getDefaultAiProvider } from "@/lib/ai/clients";
-import { buildInterviewTurnEvaluationPrompt } from "@/lib/ai/prompts/interview-session";
+import {
+  buildInterviewTurnEvaluationPrompt,
+  buildNextInterviewQuestionPrompt,
+} from "@/lib/ai/prompts/interview-session";
 import type { InterviewAssistResult } from "@/lib/ai/schemas/interview-assist";
 import {
+  interviewNextPrimaryQuestionSchema,
   interviewSessionRecordSchema,
   interviewStartRequestSchema,
   interviewTurnEvaluationSchema,
   interviewTurnRecordSchema,
   interviewTurnRequestSchema,
+  type InterviewNextPrimaryQuestion,
   type InterviewQuestionOutline,
   type InterviewSessionRecord,
   type InterviewStartRequest,
@@ -69,6 +74,20 @@ export interface InterviewAnswerEvaluator {
   evaluate(input: InterviewEvaluatorInput): Promise<InterviewTurnEvaluation>;
 }
 
+export interface InterviewNextQuestionGeneratorInput {
+  workspace: Awaited<ReturnType<ResumeWorkspaceStore["getCurrentWorkspace"]>>;
+  job: Awaited<ReturnType<JobRepository["getJobById"]>>;
+  rewrite: Awaited<ReturnType<ResumeRewriteStore["getLatestRewrite"]>>;
+  outline: InterviewQuestionOutline[];
+  turns: InterviewTurnRecord[];
+}
+
+export interface InterviewNextQuestionGenerator {
+  generateNextPrimary(
+    input: InterviewNextQuestionGeneratorInput,
+  ): Promise<InterviewNextPrimaryQuestion>;
+}
+
 export interface InterviewSessionDependencies {
   workspaceStore: Pick<ResumeWorkspaceStore, "getCurrentWorkspace">;
   jobRepository: Pick<JobRepository, "getJobById">;
@@ -76,6 +95,7 @@ export interface InterviewSessionDependencies {
   store: InterviewSessionStore;
   planGenerator: (input: InterviewPlanGeneratorInput) => Promise<InterviewAssistResult>;
   answerEvaluator: InterviewAnswerEvaluator;
+  nextQuestionGenerator: InterviewNextQuestionGenerator;
 }
 
 export interface InterviewSessionStartResult {
@@ -94,6 +114,7 @@ export interface InterviewTurnResult {
   lastFeedback: {
     score: number;
     feedback: string;
+    referenceAnswer: string;
   };
   progress: {
     current: number;
@@ -433,16 +454,124 @@ class OpenAiInterviewTurnEvaluator implements InterviewAnswerEvaluator {
             properties: {
               score: { type: "integer", minimum: 1, maximum: 5 },
               feedback: { type: "string" },
+              referenceAnswer: { type: "string" },
               shouldAskFollowUp: { type: "boolean" },
               followUpQuestion: { type: "string" },
             },
-            required: ["score", "feedback", "shouldAskFollowUp"],
+            required: ["score", "feedback", "referenceAnswer", "shouldAskFollowUp"],
           },
         },
       },
     });
 
     return interviewTurnEvaluationSchema.parse(JSON.parse(response.output_text));
+  }
+}
+
+class GeminiInterviewNextQuestionGenerator implements InterviewNextQuestionGenerator {
+  private readonly client: OpenAI;
+  private readonly model: string;
+
+  constructor(
+    apiKey = process.env.GEMINI_API_KEY,
+    model = getGeminiInterviewModel(),
+  ) {
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not set.");
+    }
+
+    this.client = new OpenAI({
+      apiKey,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    });
+    this.model = model;
+  }
+
+  async generateNextPrimary(input: InterviewNextQuestionGeneratorInput) {
+    const prompt = buildNextInterviewQuestionPrompt({
+      workspace: input.workspace!,
+      job: input.job!,
+      rewrite: input.rewrite!,
+      outline: input.outline,
+      turns: input.turns,
+    });
+
+    const response = await this.client.beta.chat.completions.parse({
+      model: this.model,
+      messages: [
+        {
+          role: "system",
+          content: "You are a Chinese AI interviewer. Generate exactly one new primary interview question at a time.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      response_format: zodResponseFormat(
+        interviewNextPrimaryQuestionSchema,
+        "interview_next_primary_question",
+      ),
+    });
+
+    return interviewNextPrimaryQuestionSchema.parse(response.choices[0]?.message.parsed ?? null);
+  }
+}
+
+class OpenAiInterviewNextQuestionGenerator implements InterviewNextQuestionGenerator {
+  private readonly client: OpenAI;
+  private readonly model: string;
+
+  constructor(
+    apiKey = process.env.OPENAI_API_KEY,
+    model = process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+  ) {
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not set.");
+    }
+
+    this.client = new OpenAI({ apiKey });
+    this.model = model;
+  }
+
+  async generateNextPrimary(input: InterviewNextQuestionGeneratorInput) {
+    const prompt = buildNextInterviewQuestionPrompt({
+      workspace: input.workspace!,
+      job: input.job!,
+      rewrite: input.rewrite!,
+      outline: input.outline,
+      turns: input.turns,
+    });
+
+    const response = await this.client.responses.create({
+      model: this.model,
+      input: prompt,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "interview_next_primary_question",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              question: { type: "string" },
+              followUps: {
+                type: "array",
+                items: { type: "string" },
+              },
+              answerFramework: {
+                type: "array",
+                items: { type: "string" },
+              },
+            },
+            required: ["question", "followUps", "answerFramework"],
+          },
+        },
+      },
+    });
+
+    return interviewNextPrimaryQuestionSchema.parse(JSON.parse(response.output_text));
   }
 }
 
@@ -474,11 +603,26 @@ export function createDefaultInterviewAnswerEvaluator(): InterviewAnswerEvaluato
   throw new Error("No AI provider key found. Set GEMINI_API_KEY or OPENAI_API_KEY.");
 }
 
+export function createDefaultInterviewNextQuestionGenerator(): InterviewNextQuestionGenerator {
+  const provider = getDefaultAiProvider();
+
+  if (provider === "gemini") {
+    return new GeminiInterviewNextQuestionGenerator();
+  }
+
+  if (provider === "openai") {
+    return new OpenAiInterviewNextQuestionGenerator();
+  }
+
+  throw new Error("No AI provider key found. Set GEMINI_API_KEY or OPENAI_API_KEY.");
+}
+
 export async function startInterviewSession(
-  input: InterviewStartRequest,
+  input: InterviewStartRequest & { userId?: string },
   providedDependencies?: Partial<InterviewSessionDependencies>,
 ): Promise<InterviewSessionStartResult> {
   const parsed = interviewStartRequestSchema.parse(input);
+  const userId = typeof input.userId === "string" ? input.userId : undefined;
   const dependencies: InterviewSessionDependencies = {
     workspaceStore: providedDependencies?.workspaceStore ?? getResumeWorkspaceStore(),
     jobRepository: providedDependencies?.jobRepository ?? getJobRepository(),
@@ -493,14 +637,17 @@ export async function startInterviewSession(
         })),
     answerEvaluator:
       providedDependencies?.answerEvaluator ?? createDefaultInterviewAnswerEvaluator(),
+    nextQuestionGenerator:
+      providedDependencies?.nextQuestionGenerator ??
+      createDefaultInterviewNextQuestionGenerator(),
   };
 
-  const workspace = await dependencies.workspaceStore.getCurrentWorkspace();
+  const workspace = await dependencies.workspaceStore.getCurrentWorkspace(userId);
   if (!workspace) {
     throw new Error("Resume workspace not found.");
   }
 
-  const job = await dependencies.jobRepository.getJobById(parsed.jobId);
+  const job = await dependencies.jobRepository.getJobById(parsed.jobId, userId);
   if (!job) {
     throw new Error("Job target not found.");
   }
@@ -544,10 +691,11 @@ export async function startInterviewSession(
 }
 
 export async function answerInterviewTurn(
-  input: InterviewTurnRequest,
+  input: InterviewTurnRequest & { userId?: string },
   providedDependencies?: Partial<InterviewSessionDependencies>,
 ): Promise<InterviewTurnResult> {
   const parsed = interviewTurnRequestSchema.parse(input);
+  const userId = typeof input.userId === "string" ? input.userId : undefined;
   const dependencies: InterviewSessionDependencies = {
     workspaceStore: providedDependencies?.workspaceStore ?? getResumeWorkspaceStore(),
     jobRepository: providedDependencies?.jobRepository ?? getJobRepository(),
@@ -562,6 +710,9 @@ export async function answerInterviewTurn(
         })),
     answerEvaluator:
       providedDependencies?.answerEvaluator ?? createDefaultInterviewAnswerEvaluator(),
+    nextQuestionGenerator:
+      providedDependencies?.nextQuestionGenerator ??
+      createDefaultInterviewNextQuestionGenerator(),
   };
 
   const session = await dependencies.store.getSessionById(parsed.sessionId);
@@ -569,12 +720,12 @@ export async function answerInterviewTurn(
     throw new Error("Interview session not found.");
   }
 
-  const workspace = await dependencies.workspaceStore.getCurrentWorkspace();
+  const workspace = await dependencies.workspaceStore.getCurrentWorkspace(userId);
   if (!workspace) {
     throw new Error("Resume workspace not found.");
   }
 
-  const job = await dependencies.jobRepository.getJobById(session.jobTargetId);
+  const job = await dependencies.jobRepository.getJobById(session.jobTargetId, userId);
   if (!job) {
     throw new Error("Job target not found.");
   }
@@ -633,6 +784,7 @@ export async function answerInterviewTurn(
       lastFeedback: {
         score: evaluation.score,
         feedback: evaluation.feedback,
+        referenceAnswer: evaluation.referenceAnswer,
       },
       progress: {
         current: updatedSession.currentTurnIndex + 1,
@@ -644,21 +796,43 @@ export async function answerInterviewTurn(
   const nextPrimaryIndex = primaryAskedCount;
 
   if (nextPrimaryIndex >= session.outline.length) {
-    const completedSession = await dependencies.store.updateSession(session.id, {
-      status: "completed",
-      currentTurnIndex: session.outline.length,
+    const generatedNext = await dependencies.nextQuestionGenerator.generateNextPrimary({
+      workspace,
+      job,
+      rewrite,
+      outline: session.outline,
+      turns,
+    });
+    const extendedOutline = [
+      ...session.outline,
+      {
+        question: generatedNext.question,
+        followUps: generatedNext.followUps,
+        answerFramework: generatedNext.answerFramework,
+      },
+    ];
+    const nextTurn = await dependencies.store.createTurn({
+      sessionId: session.id,
+      turnIndex: nextTurnIndex,
+      kind: "primary",
+      question: generatedNext.question,
+    });
+    const updatedSession = await dependencies.store.updateSession(session.id, {
+      currentTurnIndex: nextPrimaryIndex,
+      outline: extendedOutline,
     });
 
     return {
-      session: completedSession,
-      currentQuestion: null,
+      session: updatedSession,
+      currentQuestion: nextTurn,
       lastFeedback: {
         score: evaluation.score,
         feedback: evaluation.feedback,
+        referenceAnswer: evaluation.referenceAnswer,
       },
       progress: {
-        current: completedSession.outline.length,
-        total: completedSession.outline.length,
+        current: nextPrimaryIndex + 1,
+        total: updatedSession.outline.length,
       },
     };
   }
@@ -680,6 +854,7 @@ export async function answerInterviewTurn(
     lastFeedback: {
       score: evaluation.score,
       feedback: evaluation.feedback,
+      referenceAnswer: evaluation.referenceAnswer,
     },
     progress: {
       current: nextPrimaryIndex + 1,

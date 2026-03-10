@@ -165,6 +165,9 @@ OfferPilot 的推荐开发顺序：
 - [x] `中文单工作台骨架 + 登录入口 + PDF 简历上传入口 + JD 来源 URL`
 - [x] `interview_sessions` / `interview_turns` 表与一问一答模拟面试 API`
 - [x] `prepare staged fast path：先返回改写建议，再启动模拟面试`
+- [x] `登录态路由保护 + 核心工作台 API 鉴权`
+- [x] `工作台当前用户上下文 + 退出登录`
+- [x] `模拟面试持续提问 + 单题反馈 + 参考答案`
 
 ### 进行中
 
@@ -237,6 +240,10 @@ OfferPilot 的推荐开发顺序：
 - 已切分 Gemini 模型职责：`JD 解析` 使用更快的 Flash 模型，`简历改写` 与 `面试评估` 继续使用 Pro 模型
 - 已新增 `interview_sessions` / `interview_turns`、`/api/interview/start`、`/api/interview/turn`
 - 已把模拟面试改成真正的一问一答：启动 session、当前题目、提交回答、反馈、追问 / 下一题
+- 已新增 `middleware` 与核心 API 鉴权，未登录用户不能再直接绕过登录进入 `/prepare`
+- 已把工作台主路径切到当前登录用户，不再把主工作台当作匿名全局状态
+- 已把单题反馈扩展为 `评分 + 反馈 + 参考答案`
+- 已把固定题纲改成持续提问：初始题纲耗尽后继续生成新的主问题
 - 已将 `0006_add_interview_session_tables.sql` 执行到 Supabase
 - 已通过 `pnpm test` / `pnpm build` 全量验证
 - 下一步聚焦：进一步压缩首屏等待时间、补齐 PDF 文件持久化、完善真实登录后用户态与记录沉淀

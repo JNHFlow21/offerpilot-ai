@@ -12,8 +12,11 @@ import { getDb } from "@/lib/db/client";
 import { resumeWorkspaces } from "@/lib/db/schema";
 
 export interface ResumeWorkspaceStore {
-  getCurrentWorkspace(): Promise<ResumeWorkspaceRecord | null>;
-  upsertCurrentWorkspace(input: ResumeWorkspaceInput): Promise<ResumeWorkspaceRecord>;
+  getCurrentWorkspace(userId?: string): Promise<ResumeWorkspaceRecord | null>;
+  upsertCurrentWorkspace(
+    userId: string | undefined,
+    input: ResumeWorkspaceInput,
+  ): Promise<ResumeWorkspaceRecord>;
 }
 
 function normalizeOptionalText(value?: string) {
@@ -98,50 +101,56 @@ function buildWorkspacePayload(input: ResumeWorkspaceInput) {
   };
 }
 
-let memoryWorkspace: ResumeWorkspaceRecord | null = null;
+const memoryWorkspaces = new Map<string, ResumeWorkspaceRecord>();
 
 class MemoryResumeWorkspaceStore implements ResumeWorkspaceStore {
-  async getCurrentWorkspace() {
-    return memoryWorkspace;
+  async getCurrentWorkspace(userId?: string) {
+    return memoryWorkspaces.get(userId ?? "__anonymous__") ?? null;
   }
 
-  async upsertCurrentWorkspace(input: ResumeWorkspaceInput) {
+  async upsertCurrentWorkspace(userId: string | undefined, input: ResumeWorkspaceInput) {
     const now = new Date().toISOString();
     const payload = buildWorkspacePayload(input);
+    const key = userId ?? "__anonymous__";
+    const current = memoryWorkspaces.get(key) ?? null;
 
-    memoryWorkspace = resumeWorkspaceRecordSchema.parse({
-      id: memoryWorkspace?.id ?? crypto.randomUUID(),
-      createdAt: memoryWorkspace?.createdAt ?? now,
+    const workspace = resumeWorkspaceRecordSchema.parse({
+      id: current?.id ?? crypto.randomUUID(),
+      createdAt: current?.createdAt ?? now,
       updatedAt: now,
       ...payload,
     });
 
-    return memoryWorkspace;
+    memoryWorkspaces.set(key, workspace);
+    return workspace;
   }
 }
 
 class PostgresResumeWorkspaceStore implements ResumeWorkspaceStore {
-  async getCurrentWorkspace() {
+  async getCurrentWorkspace(userId?: string) {
     const db = getDb();
-    const [workspace] = await db
+    const query = db
       .select()
       .from(resumeWorkspaces)
-      .orderBy(desc(resumeWorkspaces.updatedAt))
-      .limit(1);
+      .orderBy(desc(resumeWorkspaces.updatedAt));
+
+    const [workspace] = userId
+      ? await query.where(eq(resumeWorkspaces.userId, userId)).limit(1)
+      : await query.limit(1);
 
     return workspace ? toResumeWorkspaceRecord(workspace) : null;
   }
 
-  async upsertCurrentWorkspace(input: ResumeWorkspaceInput) {
+  async upsertCurrentWorkspace(userId: string | undefined, input: ResumeWorkspaceInput) {
     const db = getDb();
-    const current = await this.getCurrentWorkspace();
+    const current = await this.getCurrentWorkspace(userId);
     const payload = buildWorkspacePayload(input);
 
     if (!current) {
       const [created] = await db
         .insert(resumeWorkspaces)
         .values({
-          userId: null,
+          userId: userId ?? null,
           rawResumeText: payload.rawResumeText,
           resumeSummary: normalizeOptionalText(payload.resumeSummary),
           keyProjectBullets: payload.keyProjectBullets,
@@ -183,5 +192,5 @@ export function getResumeWorkspaceStore(): ResumeWorkspaceStore {
 }
 
 export function resetMemoryResumeWorkspaceStore() {
-  memoryWorkspace = null;
+  memoryWorkspaces.clear();
 }

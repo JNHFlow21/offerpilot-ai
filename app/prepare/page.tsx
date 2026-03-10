@@ -1,13 +1,22 @@
 import React from "react";
+import { redirect } from "next/navigation";
 
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { PrepareWorkspace } from "@/components/prepare/prepare-workspace";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { getJobRepository } from "@/lib/services/job-repository";
 import { getResumeWorkspaceStore } from "@/lib/services/resume-workspace-service";
 
 export default async function PreparePage() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const [workspace, jobs] = await Promise.all([
-    getResumeWorkspaceStore().getCurrentWorkspace(),
-    getJobRepository().listJobs(),
+    getResumeWorkspaceStore().getCurrentWorkspace(user.id),
+    getJobRepository().listJobs(user.id),
   ]);
 
   return (
@@ -29,22 +38,52 @@ export default async function PreparePage() {
       >
         <header
           style={{
-            maxWidth: "780px",
+            maxWidth: "980px",
             display: "grid",
             gap: "12px",
           }}
         >
-          <p
+          <div
             style={{
-              margin: 0,
-              textTransform: "uppercase",
-              letterSpacing: "0.16em",
-              color: "#866747",
-              fontSize: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "16px",
+              flexWrap: "wrap",
             }}
           >
-            单一工作台
-          </p>
+            <p
+              style={{
+                margin: 0,
+                textTransform: "uppercase",
+                letterSpacing: "0.16em",
+                color: "#866747",
+                fontSize: "12px",
+              }}
+            >
+              单一工作台
+            </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              <span
+                style={{
+                  borderRadius: "999px",
+                  padding: "10px 14px",
+                  background: "rgba(255, 248, 238, 0.92)",
+                  color: "#5c4732",
+                  fontSize: "14px",
+                }}
+              >
+                当前账号：{user.email ?? "已登录用户"}
+              </span>
+              <SignOutButton />
+            </div>
+          </div>
           <h1
             style={{
               margin: 0,
@@ -67,7 +106,11 @@ export default async function PreparePage() {
           </p>
         </header>
 
-        <PrepareWorkspace initialWorkspace={workspace} initialJobs={jobs} />
+        <PrepareWorkspace
+          currentUserEmail={user.email ?? undefined}
+          initialWorkspace={workspace}
+          initialJobs={jobs}
+        />
       </section>
     </main>
   );

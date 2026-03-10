@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import type { JdAnalysisResult } from "@/lib/ai/schemas/jd-analysis";
 import { jdAnalysisSchema } from "@/lib/ai/schemas/jd-analysis";
@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db/client";
 import { jdAnalyses, jobTargets } from "@/lib/db/schema";
 
 export interface JobRecordInput {
+  userId?: string;
   companyName?: string;
   roleName: string;
   jdText: string;
@@ -20,19 +21,23 @@ export interface JobRecord extends JobRecordInput {
 
 export interface JobRepository {
   createJob(input: JobRecordInput): Promise<JobRecord>;
-  listJobs(): Promise<JobRecord[]>;
-  getJobById(jobId: string): Promise<JobRecord | null>;
-  saveAnalysis(jobId: string, analysis: JdAnalysisResult): Promise<JobRecord | null>;
+  listJobs(userId?: string): Promise<JobRecord[]>;
+  getJobById(jobId: string, userId?: string): Promise<JobRecord | null>;
+  saveAnalysis(jobId: string, analysis: JdAnalysisResult, userId?: string): Promise<JobRecord | null>;
 }
 
-const memoryJobs = new Map<string, JobRecord>();
+const memoryJobs = new Map<string, JobRecord & { userId?: string }>();
 
 class MemoryJobRepository implements JobRepository {
   async createJob(input: JobRecordInput) {
-    const record: JobRecord = {
+    const record: JobRecord & { userId?: string } = {
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
-      ...input,
+      userId: input.userId,
+      companyName: input.companyName,
+      roleName: input.roleName,
+      jdText: input.jdText,
+      sourceUrl: input.sourceUrl,
     };
 
     memoryJobs.set(record.id, record);
@@ -40,18 +45,28 @@ class MemoryJobRepository implements JobRepository {
     return record;
   }
 
-  async listJobs() {
-    return [...memoryJobs.values()].sort((left, right) =>
-      right.createdAt.localeCompare(left.createdAt),
-    );
+  async listJobs(userId?: string) {
+    return [...memoryJobs.values()]
+      .filter((job) => (userId ? job.userId === userId : true))
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
   }
 
-  async getJobById(jobId: string) {
-    return memoryJobs.get(jobId) ?? null;
+  async getJobById(jobId: string, userId?: string) {
+    const job = memoryJobs.get(jobId) ?? null;
+
+    if (!job) {
+      return null;
+    }
+
+    if (userId && job.userId !== userId) {
+      return null;
+    }
+
+    return job;
   }
 
-  async saveAnalysis(jobId: string, analysis: JdAnalysisResult) {
-    const record = memoryJobs.get(jobId);
+  async saveAnalysis(jobId: string, analysis: JdAnalysisResult, userId?: string) {
+    const record = await this.getJobById(jobId, userId);
 
     if (!record) {
       return null;
@@ -77,7 +92,7 @@ class PostgresJobRepository implements JobRepository {
         roleName: input.roleName,
         jdText: input.jdText,
         jobSourceUrl: input.sourceUrl ?? null,
-        userId: null,
+        userId: input.userId ?? null,
       })
       .returning();
 
@@ -91,13 +106,16 @@ class PostgresJobRepository implements JobRepository {
     };
   }
 
-  async listJobs() {
+  async listJobs(userId?: string) {
     const db = getDb();
-    const jobs = await db
+    const query = db
       .select()
       .from(jobTargets)
-      .orderBy(desc(jobTargets.updatedAt), desc(jobTargets.createdAt))
-      .limit(12);
+      .orderBy(desc(jobTargets.updatedAt), desc(jobTargets.createdAt));
+
+    const jobs = userId
+      ? await query.where(eq(jobTargets.userId, userId)).limit(12)
+      : await query.limit(12);
 
     return jobs.map((job) => ({
       id: job.id,
@@ -109,12 +127,12 @@ class PostgresJobRepository implements JobRepository {
     }));
   }
 
-  async getJobById(jobId: string) {
+  async getJobById(jobId: string, userId?: string) {
     const db = getDb();
     const [job] = await db
       .select()
       .from(jobTargets)
-      .where(eq(jobTargets.id, jobId))
+      .where(userId ? and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)) : eq(jobTargets.id, jobId))
       .limit(1);
 
     if (!job) {
@@ -148,7 +166,7 @@ class PostgresJobRepository implements JobRepository {
     };
   }
 
-  async saveAnalysis(jobId: string, analysis: JdAnalysisResult) {
+  async saveAnalysis(jobId: string, analysis: JdAnalysisResult, userId?: string) {
     const db = getDb();
     await db.insert(jdAnalyses).values({
       jobTargetId: jobId,
@@ -161,7 +179,7 @@ class PostgresJobRepository implements JobRepository {
       rawResult: analysis,
     });
 
-    return this.getJobById(jobId);
+    return this.getJobById(jobId, userId);
   }
 }
 

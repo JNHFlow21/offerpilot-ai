@@ -51,27 +51,30 @@ describe("interview session service", () => {
             answerFramework: ["背景", "动机", "证据"],
             citations: [],
           },
-          {
-            question: "你做过最能体现产品判断的一段项目是什么？",
-            followUps: ["你如何定义成功？"],
-            answerFramework: ["背景", "判断", "结果"],
-            citations: [],
-          },
         ],
         scopeNotice: "仅基于当前 JD、简历与知识库。",
       }),
+      nextQuestionGenerator: {
+        generateNextPrimary: vi.fn().mockResolvedValue({
+          question: "你最近一次做 AI 产品判断时，最核心的取舍是什么？",
+          followUps: ["为什么当时不是另一个方向？"],
+          answerFramework: ["背景", "判断标准", "结果"],
+        }),
+      },
       answerEvaluator: {
         evaluate: vi
           .fn()
           .mockResolvedValueOnce({
             score: 4,
             feedback: "回答结构清楚，但可以补充更直接的岗位动机。",
+            referenceAnswer: "可以先讲当前背景，再讲为什么看好 AI 产品长期价值，最后补一段与你的项目经历强相关的证据。",
             shouldAskFollowUp: true,
             followUpQuestion: "为什么你想从普通 PM 转向 AI 产品经理？",
           })
           .mockResolvedValueOnce({
             score: 4,
             feedback: "追问回答到位，可以进入下一题。",
+            referenceAnswer: "可以明确说明你想承担更高密度的产品判断，并用一段你亲自做取舍的项目来证明。",
             shouldAskFollowUp: false,
           }),
       },
@@ -83,7 +86,7 @@ describe("interview session service", () => {
     );
 
     expect(started.currentQuestion?.question).toBe("请先做一个 1 分钟自我介绍。");
-    expect(started.progress.total).toBe(2);
+    expect(started.progress.total).toBe(1);
 
     const afterPrimary = await answerInterviewTurn(
       {
@@ -95,6 +98,7 @@ describe("interview session service", () => {
 
     expect(afterPrimary.currentQuestion?.question).toBe("为什么你想从普通 PM 转向 AI 产品经理？");
     expect(afterPrimary.lastFeedback?.score).toBe(4);
+    expect(afterPrimary.lastFeedback?.referenceAnswer).toMatch(/长期价值/);
 
     const afterFollowUp = await answerInterviewTurn(
       {
@@ -104,7 +108,8 @@ describe("interview session service", () => {
       dependencies as never,
     );
 
-    expect(afterFollowUp.currentQuestion?.question).toBe("你做过最能体现产品判断的一段项目是什么？");
+    expect(afterFollowUp.currentQuestion?.question).toBe("你最近一次做 AI 产品判断时，最核心的取舍是什么？");
+    expect(afterFollowUp.lastFeedback?.referenceAnswer).toMatch(/高密度的产品判断/);
     expect(afterFollowUp.progress.current).toBe(2);
   });
 });

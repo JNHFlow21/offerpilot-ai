@@ -12,6 +12,7 @@ import { getResumeWorkspaceStore } from "@/lib/services/resume-workspace-service
 import { runJdAnalysisForJob } from "@/lib/services/job-service";
 
 export interface PrepareRunInput {
+  userId?: string;
   companyName?: string;
   roleName: string;
   jdText: string;
@@ -28,13 +29,13 @@ export interface PrepareRunResult {
 
 export interface PrepareRunDependencies {
   workspaceStore: {
-    upsertCurrentWorkspace(input: {
+    upsertCurrentWorkspace(userId: string | undefined, input: {
       rawResumeText: string;
       resumeSummary?: string;
       keyProjectBullets?: string[];
       rewriteFocus?: string;
     }): Promise<ResumeWorkspaceRecord>;
-    getCurrentWorkspace?(): Promise<ResumeWorkspaceRecord | null>;
+    getCurrentWorkspace?(userId?: string): Promise<ResumeWorkspaceRecord | null>;
   };
   jobRepository: Pick<JobRepository, "createJob" | "getJobById" | "saveAnalysis">;
   knowledgeStore: ResumeRewriteDependencies["knowledgeStore"];
@@ -69,11 +70,12 @@ export async function runPreparePipeline(
     ...providedDependencies,
   } as PrepareRunDependencies;
 
-  const workspace = await dependencies.workspaceStore.upsertCurrentWorkspace({
+  const workspace = await dependencies.workspaceStore.upsertCurrentWorkspace(input.userId, {
     rawResumeText: input.resumeText,
   });
 
   const createdJob = await dependencies.jobRepository.createJob({
+    userId: input.userId,
     companyName: input.companyName,
     roleName: input.roleName,
     jdText: input.jdText,
@@ -88,8 +90,13 @@ export async function runPreparePipeline(
       knowledgeScope: "all",
     },
     {
-      workspaceStore: dependencies.workspaceStore as ResumeRewriteDependencies["workspaceStore"],
-      jobRepository: dependencies.jobRepository,
+      workspaceStore: {
+        getCurrentWorkspace: () =>
+          dependencies.workspaceStore.getCurrentWorkspace?.(input.userId) ?? Promise.resolve(null),
+      },
+      jobRepository: {
+        getJobById: (jobId) => dependencies.jobRepository.getJobById(jobId, input.userId),
+      } as ResumeRewriteDependencies["jobRepository"],
       knowledgeStore: dependencies.knowledgeStore,
       rewriteStore: dependencies.rewriteStore,
     },

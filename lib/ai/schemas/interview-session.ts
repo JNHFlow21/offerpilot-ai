@@ -46,8 +46,15 @@ export const interviewTurnRequestSchema = z.object({
 export const interviewTurnEvaluationSchema = z.object({
   score: z.number().int().min(1).max(5),
   feedback: z.string().trim().min(1),
+  referenceAnswer: z.string().trim().min(1),
   shouldAskFollowUp: z.boolean().default(false),
   followUpQuestion: z.string().trim().min(1).optional(),
+});
+
+export const interviewNextPrimaryQuestionSchema = z.object({
+  question: z.string().trim().min(1),
+  followUps: z.array(z.string().trim().min(1)).default([]),
+  answerFramework: z.array(z.string().trim().min(1)).default([]),
 });
 
 export type InterviewQuestionOutline = z.infer<typeof interviewQuestionOutlineSchema>;
@@ -56,3 +63,4 @@ export type InterviewTurnRecord = z.infer<typeof interviewTurnRecordSchema>;
 export type InterviewStartRequest = z.infer<typeof interviewStartRequestSchema>;
 export type InterviewTurnRequest = z.infer<typeof interviewTurnRequestSchema>;
 export type InterviewTurnEvaluation = z.infer<typeof interviewTurnEvaluationSchema>;
+export type InterviewNextPrimaryQuestion = z.infer<typeof interviewNextPrimaryQuestionSchema>;
