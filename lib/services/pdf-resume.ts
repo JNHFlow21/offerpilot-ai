@@ -1,7 +1,7 @@
 async function parsePdfBuffer(buffer: Buffer) {
-  const { CanvasFactory } = await import("pdf-parse/worker");
+  await import("pdf-parse/worker");
   const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer, CanvasFactory });
+  const parser = new PDFParse({ data: buffer });
 
   try {
     const result = await parser.getText();
