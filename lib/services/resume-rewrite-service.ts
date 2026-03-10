@@ -2,7 +2,11 @@ import { and, desc, eq } from "drizzle-orm";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 
-import { getDefaultAiProvider } from "@/lib/ai/clients";
+import {
+  getDefaultAiProvider,
+  getGeminiInterviewModel,
+  getGeminiRewriteModel,
+} from "@/lib/ai/clients";
 import { buildInterviewAssistPrompt } from "@/lib/ai/prompts/interview-assist";
 import { buildResumeRewritePrompt } from "@/lib/ai/prompts/resume-rewrite";
 import {
@@ -205,7 +209,7 @@ class GeminiResumeRewriteClient implements ResumeRewriteClient {
 
   constructor(
     apiKey = process.env.GEMINI_API_KEY,
-    model = process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
+    model = getGeminiRewriteModel(),
   ) {
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set.");
@@ -279,7 +283,7 @@ class GeminiInterviewAssistClient implements InterviewAssistClient {
 
   constructor(
     apiKey = process.env.GEMINI_API_KEY,
-    model = process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
+    model = getGeminiInterviewModel(),
   ) {
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set.");

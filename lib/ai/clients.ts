@@ -16,13 +16,25 @@ export interface JdAnalysisClient {
   }): Promise<JdAnalysisResult | unknown>;
 }
 
+export function getGeminiJdModel() {
+  return process.env.GEMINI_JD_MODEL || "gemini-2.5-flash";
+}
+
+export function getGeminiRewriteModel() {
+  return process.env.GEMINI_REWRITE_MODEL || "gemini-3.1-pro-preview";
+}
+
+export function getGeminiInterviewModel() {
+  return process.env.GEMINI_INTERVIEW_MODEL || "gemini-3.1-pro-preview";
+}
+
 export class GeminiJdAnalysisClient implements JdAnalysisClient {
   private readonly client: OpenAI;
   private readonly model: string;
 
   constructor(
     apiKey = process.env.GEMINI_API_KEY,
-    model = process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
+    model = getGeminiJdModel(),
   ) {
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set.");

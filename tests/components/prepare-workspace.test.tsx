@@ -23,5 +23,6 @@ describe("PrepareWorkspace", () => {
     expect(
       screen.getByRole("heading", { name: /模拟面试/i }),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/生成模拟面试问题/i)).not.toBeInTheDocument();
   });
 });

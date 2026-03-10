@@ -1,11 +1,9 @@
-import type { InterviewAssistResult } from "@/lib/ai/schemas/interview-assist";
 import type { ResumeRewriteRecord } from "@/lib/ai/schemas/resume-rewrite";
 import type { ResumeWorkspaceRecord } from "@/lib/ai/schemas/resume-workspace";
 import type { JobRecord, JobRepository } from "@/lib/services/job-repository";
 import { getJobRepository } from "@/lib/services/job-repository";
 import { getKnowledgeStore } from "@/lib/services/knowledge-service";
 import {
-  generateInterviewAssistForJob,
   getResumeRewriteStore,
   rewriteResumeForJob,
   type ResumeRewriteDependencies,
@@ -25,7 +23,7 @@ export interface PrepareRunResult {
   workspace: ResumeWorkspaceRecord;
   job: JobRecord;
   rewrite: ResumeRewriteRecord;
-  assist: InterviewAssistResult;
+  status: "rewrite_ready";
 }
 
 export interface PrepareRunDependencies {
@@ -46,7 +44,6 @@ export interface PrepareRunDependencies {
     repository: Pick<JobRepository, "getJobById" | "saveAnalysis">,
   ) => Promise<JobRecord>;
   rewriteResume: typeof rewriteResumeForJob;
-  generateInterviewAssist: typeof generateInterviewAssistForJob;
 }
 
 function defaultDependencies(): PrepareRunDependencies {
@@ -60,7 +57,6 @@ function defaultDependencies(): PrepareRunDependencies {
     rewriteStore: getResumeRewriteStore(),
     analyzeJob: runJdAnalysisForJob,
     rewriteResume: rewriteResumeForJob,
-    generateInterviewAssist: generateInterviewAssistForJob,
   };
 }
 
@@ -99,23 +95,10 @@ export async function runPreparePipeline(
     },
   );
 
-  const assist = await dependencies.generateInterviewAssist(
-    {
-      jobId: createdJob.id,
-      knowledgeScope: "all",
-    },
-    {
-      workspaceStore: dependencies.workspaceStore as ResumeRewriteDependencies["workspaceStore"],
-      jobRepository: dependencies.jobRepository,
-      knowledgeStore: dependencies.knowledgeStore,
-      rewriteStore: dependencies.rewriteStore,
-    },
-  );
-
   return {
     workspace,
     job,
     rewrite,
-    assist,
+    status: "rewrite_ready",
   };
 }

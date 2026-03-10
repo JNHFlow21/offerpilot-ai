@@ -20,6 +20,7 @@ describe("PrepareWorkspace flow", () => {
     expect(screen.getByRole("heading", { name: /改写建议/i })).toBeInTheDocument();
     expect(screen.getByText(/步骤 4/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /模拟面试/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/一问一答的模拟面试/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/knowledge/i)).not.toBeInTheDocument();
   });
 });

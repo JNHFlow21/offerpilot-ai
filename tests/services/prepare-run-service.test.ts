@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 describe("prepare run service", () => {
-  it("runs the full pipeline in one request", async () => {
+  it("returns rewrite-ready results without blocking on interview generation", async () => {
     const { runPreparePipeline } = await import("@/lib/services/prepare-run-service");
+    const generateInterviewAssist = vi.fn();
 
     const result = await runPreparePipeline(
       {
@@ -130,36 +131,14 @@ describe("prepare run service", () => {
           createdAt: "2026-03-10T00:00:00.000Z",
           updatedAt: "2026-03-10T00:00:00.000Z",
         }),
-        generateInterviewAssist: vi.fn().mockResolvedValue({
-          overview: "优先准备项目深挖和 AI 能力判断。",
-          questions: [
-            {
-              question: "你为什么适合这个岗位？",
-              followUps: ["你最能证明自己的项目是什么？"],
-              answerFramework: ["岗位理解", "项目证据"],
-              citations: [],
-            },
-            {
-              question: "你做过哪些 AI 产品判断？",
-              followUps: ["你的判断依据是什么？"],
-              answerFramework: ["背景", "判断", "结果"],
-              citations: [],
-            },
-            {
-              question: "你如何推动跨团队落地？",
-              followUps: ["你遇到的阻力是什么？"],
-              answerFramework: ["目标对齐", "推进策略", "结果"],
-              citations: [],
-            },
-          ],
-          scopeNotice: "仅基于当前简历、JD 与知识库生成。",
-        }),
+        generateInterviewAssist,
       },
     );
 
     expect(result.workspace.id).toBe("workspace-1");
     expect(result.job.id).toBe("job-1");
     expect(result.rewrite.id).toBe("rewrite-1");
-    expect(result.assist.questions).toHaveLength(3);
+    expect(result.status).toBe("rewrite_ready");
+    expect(generateInterviewAssist).not.toHaveBeenCalled();
   });
 });

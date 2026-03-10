@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 
-import type { InterviewAssistResult } from "@/lib/ai/schemas/interview-assist";
 import type { ResumeRewriteRecord } from "@/lib/ai/schemas/resume-rewrite";
 import type { ResumeWorkspaceRecord } from "@/lib/ai/schemas/resume-workspace";
 import type { JobRecord } from "@/lib/services/job-repository";
@@ -58,7 +57,6 @@ export function PrepareWorkspace({
   );
   const [job, setJob] = useState<JobRecord | null>(null);
   const [rewrite, setRewrite] = useState<ResumeRewriteRecord | null>(null);
-  const [assist, setAssist] = useState<InterviewAssistResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -104,14 +102,13 @@ export function PrepareWorkspace({
         workspace: ResumeWorkspaceRecord;
         job: JobRecord;
         rewrite: ResumeRewriteRecord;
-        assist: InterviewAssistResult;
+        status: "rewrite_ready";
       };
 
       setWorkspace(data.workspace);
       setJob(data.job);
       setRewrite(data.rewrite);
-      setAssist(data.assist);
-      setSavedMessage("准备方案已生成。系统已自动完成简历提取、JD 解析、改写建议和模拟面试辅助。");
+      setSavedMessage("准备方案已生成。系统已先完成简历提取、JD 解析和改写建议。下一步进入模拟面试。");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "生成准备方案失败。");
     } finally {
@@ -387,49 +384,38 @@ export function PrepareWorkspace({
             模拟面试
           </h2>
           <p style={{ margin: 0, color: "#5c4732", lineHeight: 1.7 }}>
-            这里会自动生成高频问题、追问点和答题框架，后续再继续升级成完整多轮 Agent 面试。
+            改写建议确认后，再进入一问一答的模拟面试。不再把所有问题一次性丢给你。
           </p>
         </div>
 
-        {assist ? (
+        {rewrite ? (
           <div style={{ display: "grid", gap: "14px" }}>
+            <button
+              type="button"
+              style={{
+                width: "fit-content",
+                border: 0,
+                borderRadius: "999px",
+                padding: "14px 18px",
+                background: "#20170f",
+                color: "#fff8ec",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              开始模拟面试
+            </button>
             <div
               style={{
-                borderRadius: "18px",
-                padding: "16px",
-                background: "rgba(246, 235, 218, 0.72)",
-                color: "#3d2c1d",
+                borderRadius: "24px",
+                border: "1px dashed rgba(73, 54, 31, 0.24)",
+                padding: "22px",
+                color: "#5c4732",
                 lineHeight: 1.7,
               }}
             >
-              {assist.overview}
+              下一步会进入一问一答的模拟面试。系统会基于当前 JD、改写后的简历重点和平台知识库，逐题提问、逐题追问。
             </div>
-
-            {assist.questions.map((item) => (
-              <article
-                key={item.question}
-                style={{
-                  borderRadius: "22px",
-                  border: "1px solid rgba(73, 54, 31, 0.12)",
-                  padding: "18px",
-                  background: "rgba(255, 252, 247, 0.92)",
-                  display: "grid",
-                  gap: "12px",
-                }}
-              >
-                <h3 style={{ margin: 0, fontSize: "18px", lineHeight: 1.45 }}>{item.question}</h3>
-                <div style={{ display: "grid", gap: "6px" }}>
-                  <strong>可能追问</strong>
-                  <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "6px" }}>
-                    {item.followUps.map((followUp) => (
-                      <li key={followUp} style={{ lineHeight: 1.6 }}>
-                        {followUp}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </article>
-            ))}
           </div>
         ) : (
           <div
@@ -441,7 +427,7 @@ export function PrepareWorkspace({
               lineHeight: 1.7,
             }}
           >
-            提交后系统会自动生成第一版模拟面试问题和追问点，不再需要你手动触发。
+            先完成简历上传和 JD 提交。系统会先返回改写建议，然后再进入一问一答的模拟面试。
           </div>
         )}
       </section>
