@@ -4,26 +4,18 @@ import { render, screen } from "@testing-library/react";
 import { PrepareWorkspace } from "@/components/prepare/prepare-workspace";
 
 describe("PrepareWorkspace", () => {
-  it("renders the Chinese resume, rewrite, and interview sections", () => {
+  it("renders the single upload form and result areas", () => {
     render(
       <PrepareWorkspace
         initialWorkspace={null}
-        initialJobs={[
-          {
-            id: "11111111-1111-4111-8111-111111111111",
-            companyName: "ByteDance",
-            roleName: "AI Product Intern - TRAE",
-            jdText: "Need AI product thinking and cross-functional execution.",
-            createdAt: "2026-03-09T00:00:00.000Z",
-          },
-        ]}
+        initialJobs={[]}
       />,
     );
 
-    expect(screen.getByLabelText(/简历全文/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/目标岗位 jd/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/上传 pdf 简历/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/岗位 jd/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /保存简历/i }),
+      screen.getByRole("button", { name: /开始生成准备方案/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /改写建议/i }),
