@@ -30,6 +30,7 @@ export function buildResumeRewritePrompt(input: {
     "Rewrite the candidate resume for the target job.",
     "Stay faithful to the supplied resume. Do not fabricate experience, metrics, ownership, or outcomes.",
     "Your job is to improve positioning, wording, and emphasis so the resume better matches the JD and likely interview screens.",
+    "Keep rewriteSummary concise: at most 3 short sentences.",
     "For every suggested change, explain why it aligns with the JD.",
     "For each revised section, surface at least one likely interview question that the rewritten wording may trigger.",
     `Target company: ${input.job.companyName ?? "Unknown company"}`,

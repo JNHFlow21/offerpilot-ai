@@ -21,6 +21,25 @@ const interviewAngleSchema = z.object({
   answerFocus: z.string().trim().min(1).max(320),
 });
 
+const relaxedRevisedBulletGroupSchema = z.object({
+  sectionTitle: z.string().trim().min(1),
+  bullets: z.array(z.string().trim().min(1)).min(1).max(6),
+});
+
+const relaxedSectionSuggestionSchema = z.object({
+  sectionTitle: z.string().trim().min(1),
+  currentIssue: z.string().trim().min(1),
+  recommendedChange: z.string().trim().min(1),
+  jdAlignmentReason: z.string().trim().min(1),
+});
+
+const relaxedInterviewAngleSchema = z.object({
+  sectionTitle: z.string().trim().min(1),
+  likelyQuestion: z.string().trim().min(1),
+  rationale: z.string().trim().min(1),
+  answerFocus: z.string().trim().min(1),
+});
+
 export const resumeRewriteRequestSchema = z.object({
   jobId: z.string().uuid(),
   knowledgeScope: knowledgeScopeSchema.default("all"),
@@ -31,6 +50,13 @@ export const resumeRewriteSchema = z.object({
   sectionSuggestions: z.array(sectionSuggestionSchema).min(1).max(6),
   revisedBullets: z.array(revisedBulletGroupSchema).min(1).max(6),
   interviewAngles: z.array(interviewAngleSchema).min(1).max(8),
+});
+
+export const resumeRewriteModelSchema = z.object({
+  rewriteSummary: z.string().trim().min(1),
+  sectionSuggestions: z.array(relaxedSectionSuggestionSchema).min(1).max(6),
+  revisedBullets: z.array(relaxedRevisedBulletGroupSchema).min(1).max(6),
+  interviewAngles: z.array(relaxedInterviewAngleSchema).min(1).max(8),
 });
 
 export const resumeRewriteRecordSchema = resumeRewriteSchema.extend({

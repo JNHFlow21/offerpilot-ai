@@ -22,6 +22,7 @@ import type {
 } from "@/lib/ai/schemas/knowledge-source";
 import {
   resumeRewriteJsonSchema,
+  resumeRewriteModelSchema,
   resumeRewriteRecordSchema,
   resumeRewriteRequestSchema,
   resumeRewriteSchema,
@@ -63,6 +64,40 @@ export interface ResumeRewriteDependencies {
   jobRepository: Pick<JobRepository, "getJobById">;
   knowledgeStore: Pick<KnowledgeStore, "listChunkContexts">;
   rewriteStore: ResumeRewriteStore;
+}
+
+function clampText(value: string, max: number) {
+  const normalized = value.replace(/\s+/g, " ").trim();
+
+  if (normalized.length <= max) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+}
+
+function normalizeResumeRewrite(raw: unknown): ResumeRewriteResult {
+  const parsed = resumeRewriteModelSchema.parse(raw);
+
+  return resumeRewriteSchema.parse({
+    rewriteSummary: clampText(parsed.rewriteSummary, 400),
+    sectionSuggestions: parsed.sectionSuggestions.map((section) => ({
+      sectionTitle: clampText(section.sectionTitle, 120),
+      currentIssue: clampText(section.currentIssue, 280),
+      recommendedChange: clampText(section.recommendedChange, 320),
+      jdAlignmentReason: clampText(section.jdAlignmentReason, 320),
+    })),
+    revisedBullets: parsed.revisedBullets.map((group) => ({
+      sectionTitle: clampText(group.sectionTitle, 120),
+      bullets: group.bullets.map((bullet) => clampText(bullet, 280)),
+    })),
+    interviewAngles: parsed.interviewAngles.map((angle) => ({
+      sectionTitle: clampText(angle.sectionTitle, 120),
+      likelyQuestion: clampText(angle.likelyQuestion, 220),
+      rationale: clampText(angle.rationale, 280),
+      answerFocus: clampText(angle.answerFocus, 320),
+    })),
+  });
 }
 
 function tokenize(value: string) {
@@ -236,7 +271,7 @@ class GeminiResumeRewriteClient implements ResumeRewriteClient {
           content: input.prompt,
         },
       ],
-      response_format: zodResponseFormat(resumeRewriteSchema, "resume_rewrite"),
+      response_format: zodResponseFormat(resumeRewriteModelSchema, "resume_rewrite"),
     });
 
     return response.choices[0]?.message.parsed ?? null;
@@ -426,7 +461,7 @@ export async function rewriteResumeForJob(
     knowledgeChunks: selectedChunks,
   });
   const rawRewrite = await client.rewrite({ prompt });
-  const rewrite = resumeRewriteSchema.parse(rawRewrite);
+  const rewrite = normalizeResumeRewrite(rawRewrite);
 
   return dependencies.rewriteStore.saveRewrite(workspace.id, parsed.jobId, rewrite);
 }
