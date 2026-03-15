@@ -182,7 +182,62 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 - `/prepare` 不再一次性返回所有面试内容，而是先返回改写建议，再由面试 session 逐题推进
 - `/prepare` 由登录态保护，登录后展示当前账号上下文并允许退出登录
 
-## 8. 关键指标
+## 8. 开发方法论
+
+OfferPilot 采用正式的混合开发方法：
+
+**Harness-First Agentic Development**
+
+中文定义：
+
+**以 Harness 为主、以 Agentic 为范式、以 Ralph-style loop 为局部闭环机制的混合开发法。**
+
+在本项目里，这三个概念的分工如下：
+
+### Agentic Engineering：定义协作关系
+
+- 人类负责：目标、优先级、体验判断、最终验收
+- Agent 负责：方案收敛、实现、测试、部署、修复
+
+### Harness Engineering：定义默认执行框架
+
+- 产品 harness：Context、PRD、Journey、阶段计划
+- 工程 harness：AGENTS.md、目录结构、命名与语言约束
+- AI harness：prompt、schema、model routing、structured outputs
+- 质量 harness：tests、build、smoke checks、回归验证
+- 部署 harness：GitHub、Vercel、Supabase、env 一致性
+- 反馈 harness：试用反馈、线上报错、体验问题回流
+
+### Ralph-style loop：定义局部问题如何快速闭环
+
+只用于：
+
+- 明确 bug 修复
+- 小范围重构
+- schema / prompt 兼容问题
+- 文档和代码不一致修补
+
+标准步骤：
+
+1. 复现问题
+2. 写 failing test
+3. 做最小修复
+4. 跑 targeted tests
+5. 跑 full tests / build
+6. 必要时做线上 smoke check
+
+核心原则：
+
+1. 需求先收敛，再实现
+2. Agent 负责端到端工程执行
+3. 用户像真实用户一样试用并做体验验收
+4. 所有重要变化都要回写到文档和验证流程
+
+完整规范见：
+
+- [2026-03-15-harness-first-agentic-development-method.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-15-harness-first-agentic-development-method.md)
+
+## 9. 关键指标
 
 ### 北极星指标
 
@@ -204,7 +259,7 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 - 平均响应时长
 - 用户负向反馈率
 
-## 9. 这个项目为什么适合写进简历
+## 10. 这个项目为什么适合写进简历
 
 因为它天然覆盖了 AI PM 高频考点：
 
@@ -223,7 +278,7 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 
 **AI 求职面试助手（RAG + Workflow + Memory）**
 
-## 10. 面试中如何讲这个项目
+## 11. 面试中如何讲这个项目
 
 推荐讲述顺序：
 
@@ -236,7 +291,7 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 7. 评测：如何判断功能有效
 8. 复盘：如果继续做会怎么扩展
 
-## 11. 当前已有文档
+## 12. 当前已有文档
 
 关键文档：
 
@@ -245,6 +300,7 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 - 落地规格：[2026-03-09-offerpilot-mvp-pages-data-stack.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-offerpilot-mvp-pages-data-stack.md)
 - 新阶段计划：[2026-03-09-phase-3-resume-rewrite-interview-assist-implementation.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-phase-3-resume-rewrite-interview-assist-implementation.md)
 - 冻结版下一阶段计划：[2026-03-09-phase-4-single-workspace-auth-pdf-interview.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-phase-4-single-workspace-auth-pdf-interview.md)
+- 开发方法论：[2026-03-15-harness-first-agentic-development-method.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-15-harness-first-agentic-development-method.md)
 - 云端配置：[2026-03-09-offerpilot-cloud-setup.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-offerpilot-cloud-setup.md)
 - Supabase 教程：[2026-03-09-supabase-database-url-setup.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-supabase-database-url-setup.md)
 - 行程文档：[OfferPilot_Project_Journey.md](/Users/fujunhao/Desktop/OfferPilot/context/OfferPilot_Project_Journey.md)
@@ -253,7 +309,7 @@ repo_url: https://github.com/JNHFlow21/offerpilot-ai
 
 - 当前仓库内尚未迁入对应知识库文档；后续如果整理面经/题库/知识笔记，也统一放到 `/Users/fujunhao/Desktop/OfferPilot` 下维护。
 
-## 12. 在新 repo 开始时，Codex 应该直接继续做什么
+## 13. 在新 repo 开始时，Codex 应该直接继续做什么
 
 推荐起手顺序：
 

@@ -135,7 +135,36 @@ OfferPilot 的推荐开发顺序：
 6. `testing`
 7. `deploy`
 
-## 5. 当前项目状态
+## 5. 正式协作方式
+
+从 `2026-03-15` 起，OfferPilot 将当前协作流程正式定义为：
+
+**Harness-First Agentic Development**
+
+含义如下：
+
+1. `Agentic` 用来定义分工
+   用户负责目标、优先级、体验判断和验收；agent 负责方案收敛、实现、测试、部署和修复。
+
+2. `Harness` 用来定义默认执行框架
+   通过文档、工程约束、AI schema/prompt、测试、部署和反馈回流来管理整个开发闭环。
+
+3. `Ralph-style loop` 用来定义局部 bugfix 机制
+   只在明确 bug、小范围重构和兼容性问题中使用，不用它来替代产品设计和架构决策。
+
+这意味着当前项目的标准协作过程是：
+
+1. 用户先提出目标或体验问题
+2. agent 先收敛需求和范围
+3. agent 完成实现、测试、构建和部署
+4. 用户再像真实用户一样试用和验收
+5. 反馈重新进入下一轮闭环
+
+完整规范见：
+
+- [2026-03-15-harness-first-agentic-development-method.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-15-harness-first-agentic-development-method.md)
+
+## 6. 当前项目状态
 
 截至 `2026-03-09`：
 
@@ -147,7 +176,7 @@ OfferPilot 的推荐开发顺序：
 - 已绑定 GitHub 远端仓库
 - 已完成第一条 MVP 业务闭环并上线生产环境
 
-## 6. MVP 模块状态
+## 7. MVP 模块状态
 
 ### 已完成
 
@@ -185,7 +214,7 @@ OfferPilot 的推荐开发顺序：
 - [ ] `records` 聚合页和薄弱项规则计算
 - [ ] Supabase 项目 link 本地目录稳定化
 
-## 7. 当前下一步
+## 8. 当前下一步
 
 当前发现线上功能虽然可用，但主路径过于分散、英文过多、用户需要理解太多页面关系。下一阶段先进入 **MVP 冻结版重构：中文单工作台 + 登录 + PDF 简历 + JD 持久化 + 模拟面试**。
 
@@ -208,7 +237,7 @@ OfferPilot 的推荐开发顺序：
 
 - [2026-03-09-phase-4-single-workspace-auth-pdf-interview.md](/Users/fujunhao/Desktop/OfferPilot/docs/plans/2026-03-09-phase-4-single-workspace-auth-pdf-interview.md)
 
-## 8. 进展记录
+## 9. 进展记录
 
 ### 2026-03-09
 
@@ -248,7 +277,14 @@ OfferPilot 的推荐开发顺序：
 - 已通过 `pnpm test` / `pnpm build` 全量验证
 - 下一步聚焦：进一步压缩首屏等待时间、补齐 PDF 文件持久化、完善真实登录后用户态与记录沉淀
 
-## 9. 更新规则
+### 2026-03-15
+
+- 已新增正式开发方法论文档，明确当前项目采用 `Harness-First Agentic Development`
+- 已把 `Agentic`、`Harness`、`Ralph-style loop` 的分层角色写清，避免后续协作方式漂移
+- 已将“用户负责目标与体验验收、agent 负责端到端工程执行”的协作关系正式纳入项目文档
+- 已明确这套方法可复用到未来其他项目，不只服务 OfferPilot 当前仓库
+
+## 10. 更新规则
 
 后续每次有重要进展，都在这份文档补一条：
 
